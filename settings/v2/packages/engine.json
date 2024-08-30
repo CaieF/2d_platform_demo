@@ -5,9 +5,6 @@
       "base": {
         "_value": true
       },
-      "graphcis": {
-        "_value": true
-      },
       "gfx-webgl": {
         "_value": true
       },
@@ -22,6 +19,9 @@
       },
       "3d": {
         "_value": false
+      },
+      "meshopt": {
+        "_value": true
       },
       "2d": {
         "_value": true
@@ -56,10 +56,10 @@
         "_option": "physics-2d-box2d"
       },
       "physics-2d-box2d": {
-        "_value": false
+        "_value": "physics-2d-box2d"
       },
       "physics-2d-builtin": {
-        "_value": false
+        "_value": "physics-2d-builtin"
       },
       "intersection-2d": {
         "_value": true
@@ -118,8 +118,14 @@
       "marionette": {
         "_value": false
       },
+      "procedural-animation": {
+        "_value": false
+      },
       "custom-pipeline": {
         "_value": false
+      },
+      "graphcis": {
+        "_value": true
       },
       "graphics": {
         "_value": true

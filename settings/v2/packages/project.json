@@ -15,12 +15,23 @@
       {
         "index": 2,
         "name": "WALL"
+      },
+      {
+        "index": 3,
+        "name": "ENEMY"
+      },
+      {
+        "index": 4,
+        "name": "CHAR"
       }
     ],
     "collisionMatrix": {
       "0": 1,
-      "1": 4,
-      "2": 2
+      "1": 12,
+      "2": 26,
+      "3": 6,
+      "4": 4
     }
-  }
+  },
+  "custom_joint_texture_layouts": []
 }
