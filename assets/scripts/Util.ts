@@ -5,7 +5,7 @@ export class Util {
   
   // 给墙体添加碰撞组件
   static setWall(Map: TiledMap) {
-    PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
+    // PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
     
     // 获取地图墙体
     let tiledSize:Size = Map.getTileSize(); // 得到每一小块的大小

@@ -1,9 +1,9 @@
-import { _decorator, clamp, Collider2D, Component, Contact2DType, dragonBones, KeyCode, macro, Node, PhysicsSystem2D, RigidBody2D, tween, Vec2 } from 'cc';
+import { _decorator, clamp, Collider2D, Component, Contact2DType, dragonBones, IPhysics2DContact, KeyCode, macro, Node, PhysicsSystem2D, RigidBody2D, tween, Vec2 } from 'cc';
 const { ccclass, property } = _decorator;
 import { AxInput } from './AxInput';
 import { Util } from './Util';
 import { Constant } from './Constant';
-import { playIdle, playJump, playRun } from './PlayAnimation';
+import { playIdle, playJump, playRun, playTakedamage } from './PlayAnimation';
 const axInput = AxInput.instance;
 
 @ccclass('Player')
@@ -15,7 +15,8 @@ export class Player extends Component {
     private speed: number = 0; // 移动速度
     private jump_speed:number = 0; // 跳跃速度
     private rb: RigidBody2D = null!;
-    private attack1Range: Collider2D;
+    private HitCollider: Collider2D = null!; // 受击范围
+    private attack1Range: Collider2D; // 攻击范围
     private display: dragonBones.ArmatureDisplay;
 
     public get playerStatus(): number {
@@ -37,6 +38,9 @@ export class Player extends Component {
             case Constant.CharStatus.ATTACK:
                 this.playAttack();
                 break;
+            case Constant.CharStatus.TAKEDAMAGE:
+                playTakedamage(this.display, this.attack1Range);
+                break;
             default:
                 break;
             }
@@ -52,25 +56,26 @@ export class Player extends Component {
         
         for (let collider of colliders) {
             if (collider.tag == Constant.ColliderTag.PLAYER) {
-                collider?.on(Contact2DType.BEGIN_CONTACT, () => {
-                    if (this.playerStatus == Constant.CharStatus.JUMP) {
-                        if (axInput.is_action_pressed(KeyCode.KEY_A) || axInput.is_action_pressed(KeyCode.KEY_D)) {
-                            this.playerStatus = Constant.CharStatus.RUN;
-                        } else {
-                            this.playerStatus = Constant.CharStatus.IDLE;
-                        }
-                        
-                    }
-                }, this)
+                this.HitCollider = collider;
             } else if (collider.tag == Constant.ColliderTag.PLAYER_ATTACK1) {
                 this.attack1Range = collider;
             }
         }
-        
-        
     }
 
-    
+    protected onEnable(): void {
+        if (this.HitCollider) {
+            this.HitCollider?.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+            this.HitCollider?.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+        }
+    }
+
+    protected onDisable(): void {
+        if (this.HitCollider) {
+            this.HitCollider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+            this.HitCollider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
+        }
+    }
 
     start() {
         this.playerStatus = Constant.CharStatus.IDLE;
@@ -118,13 +123,10 @@ export class Player extends Component {
         this.rb!.linearVelocity = lv;
 
         // 按下攻击键
-        if (axInput.is_action_just_pressed(KeyCode.KEY_J) && this.playerStatus != Constant.CharStatus.ATTACK){
+        if (axInput.is_action_just_pressed(KeyCode.KEY_J) && this.playerStatus != Constant.CharStatus.ATTACK && this.playerStatus != Constant.CharStatus.TAKEDAMAGE){
             this.playerStatus = Constant.CharStatus.ATTACK;
         }
     }
-
-
-
 
     // 攻击状态
     playAttack() {
@@ -150,6 +152,45 @@ export class Player extends Component {
     updateColliderPosition =(collider: Collider2D, offset: number) => {
         collider.offset.x = this.ndAni.scale.x * offset;
         collider.node.worldPosition = this.node.worldPosition;
+    }
+
+    onBeginContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
+        if (self && other) {
+            if (other.group === Constant.ColliderGroup.WALL && self.tag == Constant.ColliderTag.PLAYER) {
+                if (this.playerStatus == Constant.CharStatus.JUMP) {
+                    if (axInput.is_action_pressed(KeyCode.KEY_A) || axInput.is_action_pressed(KeyCode.KEY_D)) {
+                        this.playerStatus = Constant.CharStatus.RUN;
+                    } else {
+                        this.playerStatus = Constant.CharStatus.IDLE;
+                    }
+                }
+            } else if (other.group === Constant.ColliderGroup.ENEMY && self.tag == Constant.ColliderTag.PLAYER) {
+                switch(other.tag) {
+                    case Constant.ColliderTag.ENEMY_ATTACK1:
+                        if (this.playerStatus !== Constant.CharStatus.DEATH) {
+                            this.playerStatus = Constant.CharStatus.TAKEDAMAGE;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        
+    }
+
+    onEndContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
+        if (other.group === Constant.ColliderGroup.ENEMY && self.tag == Constant.ColliderTag.PLAYER) {
+            switch(other.tag) {
+                case Constant.ColliderTag.ENEMY_ATTACK1:
+                    if (this.playerStatus == Constant.CharStatus.TAKEDAMAGE) {
+                        this.playerStatus = Constant.CharStatus.IDLE;
+                    }
+                    break;
+                default:
+                    break
+            }
+        }
     }
 }
 

@@ -18,6 +18,9 @@ export class Constant {
   static readonly ColliderTag = {
     PLAYER: 1,
     PLAYER_ATTACK1: 2,
+
+    ENEMY:10,
+    ENEMY_ATTACK1:11
   }
 
 }

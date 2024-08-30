@@ -13,10 +13,11 @@ export class Enemy extends Component {
     private speed: number = 10;
     private display: dragonBones.ArmatureDisplay;
     private rb: RigidBody2D = null!;
-    private getHitRange: Collider2D = null!; // 受击范围
+    private attackCollider: Collider2D = null!; // 碰撞器
+    private HitCollider: Collider2D = null!; // 受击范围
     hp:number = 100;
-    chaseDistance:number = 120; // 追击距离
-    attackRange: number = 30; // 攻击距离
+    chaseDistance:number = 200; // 追击距离
+    attackRange: number = 50; // 攻击距离
 
     public get enemyStatus(): number {
         return this._enemyStatus;
@@ -32,7 +33,7 @@ export class Enemy extends Component {
                 playRun(this.display);
                 break;
             case Constant.CharStatus.TAKEDAMAGE:
-                playTakedamage(this.display);
+                playTakedamage(this.display, this.attackCollider);
                 break;
             case Constant.CharStatus.DEATH:
                 this.playDeath();
@@ -47,7 +48,7 @@ export class Enemy extends Component {
 
     protected onLoad() {
         this.speed = 10;
-        this.getHitRange = this.node.getComponent(Collider2D);
+        
         if (this.ndAni) {
             this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         }
@@ -55,20 +56,27 @@ export class Enemy extends Component {
 
     protected onEnable(): void {
         this.enemyStatus = Constant.CharStatus.IDLE;
-        const collider = this.node.getComponent(Collider2D);
-        if (collider) {
-            collider?.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            collider?.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+        const colliders = this.node.getComponents(Collider2D);
+        for (let collider of colliders) {
+            if (collider.tag === Constant.ColliderTag.ENEMY) {
+                this.HitCollider = collider;
+            } else if (collider.tag === Constant.ColliderTag.ENEMY_ATTACK1) {
+                this.attackCollider = collider;
+            }
+        }
+        
+        if (this.HitCollider) {
+            this.HitCollider?.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+            this.HitCollider?.on(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
 
         this.hp = 100; //重置
     }
 
     protected onDisable(): void {
-        const collider = this.node.getComponent(Collider2D);
-        if (collider) {
-            collider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            collider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
+        if (this.HitCollider) {
+            this.HitCollider.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+            this.HitCollider.off(Contact2DType.END_CONTACT, this.onEndContact, this);
         }
     }
 
@@ -77,36 +85,40 @@ export class Enemy extends Component {
     }
 
     update(deltaTime: number) {
-        this.rb = this.getComponent(RigidBody2D);
-        let lv = this.rb!.linearVelocity;
-        const playerPosition = this.getPlayerPosition();
-        const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
-        if (distanceToPlayer < this.chaseDistance) {
-            
-
-            if (this.enemyStatus === Constant.CharStatus.IDLE) this.enemyStatus = Constant.CharStatus.RUN;
-            // 玩家在敌人左边
-            if (this.enemyStatus === Constant.CharStatus.RUN) {
-                if (playerPosition.x < this.node.worldPosition.x) {
-                    this.getHitRange.offset.x = 4.4;
-                    lv.x -= this.speed * deltaTime;
-                    this.node.setScale(-1.5, 1.5)
-                } else { // 玩家在敌人右边
-                    this.getHitRange.offset.x = -4.4;
-                    lv.x += this.speed * deltaTime;
-                    this.node.setScale(1.5, 1.5)
-                }
-            }
-            // 在敌人攻击范围内
-            // if (distanceToPlayer < this.attackRange) {
-            //     this.enemyStatus = Constant.CharStatus.ATTACK;
-            // }
-        } else {
-            if (this.enemyStatus === Constant.CharStatus.RUN) this.enemyStatus = Constant.CharStatus.IDLE;
-            lv.x = 0;
-        }
+        if (this.enemyStatus !== Constant.CharStatus.DEATH && this.enemyStatus !== Constant.CharStatus.ATTACK && this.enemyStatus !== Constant.CharStatus.TAKEDAMAGE && this.hp > 0) {
+            this.rb = this.getComponent(RigidBody2D);
         
-        this.rb!.linearVelocity = lv;
+            let lv = this.rb!.linearVelocity;
+            const playerPosition = this.getPlayerPosition();
+            const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
+            
+            if (distanceToPlayer < this.chaseDistance) {
+                if (this.enemyStatus === Constant.CharStatus.IDLE) this.enemyStatus = Constant.CharStatus.RUN;
+                // 玩家在敌人左边
+                if (this.enemyStatus === Constant.CharStatus.RUN) {
+                    if (playerPosition.x < this.node.worldPosition.x) {
+                        this.HitCollider.offset.x = 4.4;
+                        lv.x -= this.speed * deltaTime;
+                        this.node.setScale(-1.5, 1.5)
+                    } else { // 玩家在敌人右边
+                        this.HitCollider.offset.x = -4.4;
+                        lv.x += this.speed * deltaTime;
+                        this.node.setScale(1.5, 1.5)
+                    }
+                } // 在攻击范围内
+                if (distanceToPlayer < this.attackRange) {
+                    this.enemyStatus = Constant.CharStatus.ATTACK;
+                    lv.x = 0;
+                }
+            
+            } else { // 在追击范围外
+                if (this.enemyStatus === Constant.CharStatus.RUN) this.enemyStatus = Constant.CharStatus.IDLE;
+                lv.x = 0;
+            }
+        
+            this.rb!.linearVelocity = lv;
+        }    
+        
     }
 
     onBeginContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
@@ -120,6 +132,8 @@ export class Enemy extends Component {
                         }
                         break;
                     case Constant.ColliderTag.PLAYER:
+                        console.log(111);
+                        
                         contact.disabled = true;
                         break;
                     default:
@@ -143,6 +157,9 @@ export class Enemy extends Component {
                     }
                     
                     break;
+                case Constant.ColliderTag.PLAYER:
+                    contact.disabled = false;
+                    break;
                 default:
                     break;
             }
@@ -164,6 +181,24 @@ export class Enemy extends Component {
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         display.armatureName = 'Attack1';
         display.playAnimation('Attack1', 1);
+
+        const callback = this.scheduleOnce(() => {
+            this.updateColliderPosition(this.attackCollider, 14);
+            this.attackCollider.enabled = true;
+        }, 0.8)
+        // this.attackCollider.enabled = false;
+        
+        display.addEventListener(dragonBones.EventObject.COMPLETE, () => {
+            if (this.hp > 0) this.enemyStatus = Constant.CharStatus.IDLE;
+            this.attackCollider.enabled = false;
+            this.unschedule(callback);
+        }, this);
+
+    }
+
+    updateColliderPosition =(collider: Collider2D, offset: number) => {
+        collider.offset.x = this.node.scale.x * offset;
+        collider.node.worldPosition = this.node.worldPosition;
     }
 
     // 获取角色位置

@@ -1,4 +1,4 @@
-import { dragonBones } from "cc";
+import { Collider2D, dragonBones } from "cc";
 
 
 // 待机
@@ -20,7 +20,10 @@ export function playJump(display: dragonBones.ArmatureDisplay) {
 }
 
 // 受击
-export function playTakedamage(display: dragonBones.ArmatureDisplay) {
+export function playTakedamage(display: dragonBones.ArmatureDisplay, attackCollider: Collider2D) {
+  if (attackCollider) {
+    attackCollider.enabled = false;
+  }
   display.armatureName = 'TakeDamage';
   display.playAnimation('TakeDamage', 1);
 }
