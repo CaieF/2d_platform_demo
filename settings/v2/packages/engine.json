@@ -156,5 +156,9 @@
       "version": ""
     },
     "flags": {}
+  },
+  "macroConfig": {
+    "MAX_LABEL_CANVAS_POOL_SIZE": 200,
+    "BATCHER2D_MEM_INCREMENT": 1440
   }
 }

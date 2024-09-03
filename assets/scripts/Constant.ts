@@ -1,10 +1,14 @@
 export class Constant {
+  
   static readonly ColliderGroup = {
     DEFAULT: 1 << 0,
     PLAYER: 1 << 1,
     WALL: 1 << 2,
-    ENEMY: 1 << 3
+    ENEMY: 1 << 3,
+    PLAYER_ATTACK: 1 << 4,
+    ENEMY_ATTACK: 1 << 5
   }
+
 
   static readonly CharStatus = {
     IDLE: 0,
@@ -15,9 +19,17 @@ export class Constant {
     DEATH: 5
   }
 
+  static readonly PrefabUrl = {
+    DAMAGE_TEXT: 'DamageText',
+    PLAYER1: 'Player1',
+    PLAYER2: 'Player2',
+    SKELETON: 'Skeleton'
+  }
+
   static readonly ColliderTag = {
     PLAYER: 1,
     PLAYER_ATTACK1: 2,
+    PLATER_FOOTER: 3,
 
     ENEMY:10,
     ENEMY_ATTACK1:11

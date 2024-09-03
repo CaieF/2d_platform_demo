@@ -251,12 +251,12 @@
     "__prefab": {
       "__id__": 11
     },
-    "tag": 0,
+    "tag": 10,
     "_group": 8,
-    "_density": 10,
+    "_density": 1,
     "_sensor": false,
-    "_friction": 0.2,
-    "_restitution": 0.25,
+    "_friction": 0.5,
+    "_restitution": 0.7,
     "_offset": {
       "__type__": "cc.Vec2",
       "x": -4.4,
@@ -340,10 +340,10 @@
     "__prefab": {
       "__id__": 17
     },
-    "tag": 0,
-    "_group": 8,
-    "_density": 11,
-    "_sensor": false,
+    "tag": 11,
+    "_group": 32,
+    "_density": 1,
+    "_sensor": true,
     "_friction": 0.2,
     "_restitution": 0,
     "_offset": {
@@ -371,6 +371,7 @@
       "__id__": 0
     },
     "fileId": "c46/YsCPVOJYA4mWEpNYRx",
+    "instance": null,
     "targetOverrides": null
   }
 ]

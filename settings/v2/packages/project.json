@@ -22,16 +22,27 @@
       },
       {
         "index": 4,
-        "name": "CHAR"
+        "name": "PLAYER_ATTACK"
+      },
+      {
+        "index": 5,
+        "name": "ENEMY_ATTACK"
       }
     ],
     "collisionMatrix": {
       "0": 1,
-      "1": 12,
+      "1": 44,
       "2": 26,
-      "3": 6,
-      "4": 4
+      "3": 22,
+      "4": 12,
+      "5": 2
     }
   },
-  "custom_joint_texture_layouts": []
+  "custom_joint_texture_layouts": [],
+  "layer": [
+    {
+      "name": "MENU",
+      "value": 1
+    }
+  ]
 }

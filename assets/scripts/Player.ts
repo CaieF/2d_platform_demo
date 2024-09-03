@@ -4,6 +4,7 @@ import { AxInput } from './AxInput';
 import { Util } from './Util';
 import { Constant } from './Constant';
 import { playIdle, playJump, playRun, playTakedamage } from './PlayAnimation';
+import { GameContext } from './GameContext';
 const axInput = AxInput.instance;
 
 @ccclass('Player')
@@ -16,8 +17,28 @@ export class Player extends Component {
     private jump_speed:number = 0; // 跳跃速度
     private rb: RigidBody2D = null!;
     private HitCollider: Collider2D = null!; // 受击范围
-    private attack1Range: Collider2D; // 攻击范围
+    private PlayerFooterCollider: Collider2D; // 角色脚下碰撞
+    private attack1Collider: Collider2D; // 攻击范围
     private display: dragonBones.ArmatureDisplay;
+    private callback: void;
+    private isHit: boolean = false; // 是否受击
+    private onTakeDamageComplete: Function ;
+    hp: number = 100; // 血量
+    maxHp: number = 100; // 最大血量
+
+    level: number = 1; // 等级
+    exp: number = 0; // 经验值
+    maxExp: number = 100; // 最大经验值
+    private _onEvent: Function;
+    private _target: any;
+
+    // 角色事件
+    static readonly Event = {
+        HURT: 0, // 受伤
+        DEATH: 1, // 死亡
+        ADD_EXP: 2, // 增加经验
+        LEVEL_UP: 3, // 升级
+    }
 
     public get playerStatus(): number {
         return this._playerStatus;
@@ -25,6 +46,10 @@ export class Player extends Component {
 
     public set playerStatus(value: number) {
         this._playerStatus = value;
+        
+        this.unschedule(this.callback)
+        Util.checkCollider(this.attack1Collider);
+        
         switch (value) {
             case Constant.CharStatus.IDLE:
                 playIdle(this.display);
@@ -39,7 +64,7 @@ export class Player extends Component {
                 this.playAttack();
                 break;
             case Constant.CharStatus.TAKEDAMAGE:
-                playTakedamage(this.display, this.attack1Range);
+                this.playTakedamage();
                 break;
             default:
                 break;
@@ -52,21 +77,37 @@ export class Player extends Component {
             this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         }
         PhysicsSystem2D.instance.gravity = new Vec2(0, -600);
+    }
+
+    protected onEnable(): void {
         let colliders = this.getComponents(Collider2D);
         
         for (let collider of colliders) {
             if (collider.tag == Constant.ColliderTag.PLAYER) {
                 this.HitCollider = collider;
             } else if (collider.tag == Constant.ColliderTag.PLAYER_ATTACK1) {
-                this.attack1Range = collider;
+                this.attack1Collider = collider;
+            } else if (collider.tag == Constant.ColliderTag.PLATER_FOOTER) {
+                this.PlayerFooterCollider = collider;
             }
         }
-    }
-
-    protected onEnable(): void {
         if (this.HitCollider) {
-            this.HitCollider?.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-            this.HitCollider?.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+            this.HitCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+            this.HitCollider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+        }
+
+        if (this.PlayerFooterCollider) {
+            this.PlayerFooterCollider.on(Contact2DType.BEGIN_CONTACT, (self: Collider2D, other: Collider2D, contact: IPhysics2DContact) => {
+                if (other.group === Constant.ColliderGroup.WALL && self.tag == Constant.ColliderTag.PLATER_FOOTER) {
+                    if (this.playerStatus == Constant.CharStatus.JUMP) {
+                        if (axInput.is_action_pressed(KeyCode.KEY_A) || axInput.is_action_pressed(KeyCode.KEY_D)) {
+                            this.playerStatus = Constant.CharStatus.RUN;
+                        } else {
+                            this.playerStatus = Constant.CharStatus.IDLE;
+                        }
+                    }
+                }
+            }, this);
         }
     }
 
@@ -83,6 +124,9 @@ export class Player extends Component {
 
     
     update(deltaTime: number) {
+        if (this.playerStatus == Constant.CharStatus.TAKEDAMAGE) return;
+        if (this.playerStatus == Constant.CharStatus.ATTACK) return;
+
         this.rb = this.getComponent(RigidBody2D);
         this.speed = 12;
         this.jump_speed = 10;
@@ -115,7 +159,7 @@ export class Player extends Component {
         }
 
         // 跳跃
-        if ((axInput.is_action_just_pressed(KeyCode.KEY_W) || axInput.is_action_just_pressed(KeyCode.KEY_K)) && (this.playerStatus != Constant.CharStatus.JUMP && this.playerStatus != Constant.CharStatus.ATTACK)){
+        if ((axInput.is_action_just_pressed(KeyCode.KEY_W) || axInput.is_action_just_pressed(KeyCode.KEY_K)) && (this.playerStatus != Constant.CharStatus.JUMP)){
             this.playerStatus = Constant.CharStatus.JUMP;
             lv.y = this.jump_speed * -Math.sign(gravity.y);
         }
@@ -123,9 +167,15 @@ export class Player extends Component {
         this.rb!.linearVelocity = lv;
 
         // 按下攻击键
-        if (axInput.is_action_just_pressed(KeyCode.KEY_J) && this.playerStatus != Constant.CharStatus.ATTACK && this.playerStatus != Constant.CharStatus.TAKEDAMAGE){
+        if (axInput.is_action_just_pressed(KeyCode.KEY_J)){
             this.playerStatus = Constant.CharStatus.ATTACK;
         }
+    }
+
+    // 注册角色事件
+    onPlayerEvent(onEvent: Function, target?: any) {
+        this._onEvent = onEvent;
+        this._target = target;
     }
 
     // 攻击状态
@@ -134,19 +184,28 @@ export class Player extends Component {
         display.armatureName = 'Attack1';
         display.playAnimation('Attack1', 1);
 
-        const callback = this.scheduleOnce(() => {
-            this.updateColliderPosition(this.attack1Range, 14);
-            this.attack1Range.enabled = true;
+        this.callback = this.scheduleOnce(() => {
+            this.updateColliderPosition(this.attack1Collider, 21);
+            Util.checkCollider(this.attack1Collider, true);
         }, 0.3)
-        
-
         display.addEventListener(dragonBones.EventObject.COMPLETE, () => {
             this.playerStatus = Constant.CharStatus.IDLE;
-            this.attack1Range.enabled = false;
-            this.unschedule(callback);
+            this.unschedule(this.callback);
         }, this);
+    }
 
-        
+    // 受击状态
+    playTakedamage() {
+        const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
+        display.armatureName = 'TakeDamage';
+        display.playAnimation('TakeDamage', 1);
+
+
+        this.onTakeDamageComplete = () => {
+            this.playerStatus = Constant.CharStatus.IDLE;
+            display.removeEventListener(dragonBones.EventObject.COMPLETE, this.onTakeDamageComplete,this);
+        };
+        display.addEventListener(dragonBones.EventObject.COMPLETE, this.onTakeDamageComplete, this);
     }
 
     updateColliderPosition =(collider: Collider2D, offset: number) => {
@@ -155,42 +214,65 @@ export class Player extends Component {
     }
 
     onBeginContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
-        if (self && other) {
-            if (other.group === Constant.ColliderGroup.WALL && self.tag == Constant.ColliderTag.PLAYER) {
-                if (this.playerStatus == Constant.CharStatus.JUMP) {
-                    if (axInput.is_action_pressed(KeyCode.KEY_A) || axInput.is_action_pressed(KeyCode.KEY_D)) {
-                        this.playerStatus = Constant.CharStatus.RUN;
-                    } else {
-                        this.playerStatus = Constant.CharStatus.IDLE;
-                    }
-                }
-            } else if (other.group === Constant.ColliderGroup.ENEMY && self.tag == Constant.ColliderTag.PLAYER) {
-                switch(other.tag) {
-                    case Constant.ColliderTag.ENEMY_ATTACK1:
-                        if (this.playerStatus !== Constant.CharStatus.DEATH) {
-                            this.playerStatus = Constant.CharStatus.TAKEDAMAGE;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
         
+        if (other.group === Constant.ColliderGroup.ENEMY_ATTACK && self.tag == Constant.ColliderTag.PLAYER) {
+            switch(other.tag) {
+                case Constant.ColliderTag.ENEMY_ATTACK1:
+                    if (this.playerStatus !== Constant.CharStatus.DEATH ) {
+                        this.hurt(100);
+                    }
+                    break;
+                default:
+                    break;
+            }
+         }
     }
 
     onEndContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
         if (other.group === Constant.ColliderGroup.ENEMY && self.tag == Constant.ColliderTag.PLAYER) {
             switch(other.tag) {
                 case Constant.ColliderTag.ENEMY_ATTACK1:
-                    if (this.playerStatus == Constant.CharStatus.TAKEDAMAGE) {
-                        this.playerStatus = Constant.CharStatus.IDLE;
-                    }
                     break;
                 default:
                     break
             }
         }
+    }
+
+    // 获取下一极所需经验
+    private _getNextLevelExp(level: number) {
+        return (level + 1) * 50;
+    }
+
+    // 增加经验
+    addExp(exp: number) {
+        this.exp += exp;
+        this._onEvent && this._onEvent.apply(this._target, [Player.Event.ADD_EXP, exp]);
+
+        if (this.exp >= this.maxExp) {
+            this.exp -= this.maxExp;
+            this.level += 1;
+            this.maxExp = this._getNextLevelExp(this.level);
+            this._onEvent && this._onEvent.apply(this._target, [Player.Event.LEVEL_UP, -1]);
+        }
+    }
+
+    // 受伤
+    hurt (damage: number) {
+        this.hp -= damage;
+        
+        
+        Util.showText( `${damage}`, '#DC143C' ,this.node.worldPosition, GameContext.ndTextParent);
+        if (this.hp > 0) {
+            this._onEvent && this._onEvent.apply(this._target, [Player.Event.HURT, damage]);
+            if ( this.playerStatus !== Constant.CharStatus.ATTACK && this.playerStatus !== Constant.CharStatus.TAKEDAMAGE) {
+                this.playerStatus = Constant.CharStatus.TAKEDAMAGE;
+            } 
+            console.log(`HP: ${this.hp}, Status: ${this.playerStatus}`);
+        } else {
+            this.hp = 0;
+            this._onEvent && this._onEvent.apply(this._target, [Player.Event.DEATH, 0]);
+        }   
     }
 }
 
