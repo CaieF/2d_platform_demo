@@ -12,9 +12,9 @@ export class Player extends Component {
     @property(Node) private ndAni: Node;
 
     // private beforeStatus: number = 0; // 之前角色状态
+    private _playerId: number = 0; // 角色id
+    private _attack1Offset: number = 0; // 攻击1偏移量
     private _playerStatus: number = 0; // 角色状态
-    private speed: number = 0; // 移动速度
-    private jump_speed:number = 0; // 跳跃速度
     private rb: RigidBody2D = null!;
     private HitCollider: Collider2D = null!; // 受击范围
     private PlayerFooterCollider: Collider2D; // 角色脚下碰撞
@@ -23,12 +23,16 @@ export class Player extends Component {
     private callback: void;
     private isHit: boolean = false; // 是否受击
     private onTakeDamageComplete: Function ;
+
+
     hp: number = 100; // 血量
     maxHp: number = 100; // 最大血量
-
+    speed: number = 12; // 移动速度
+    jump_speed:number = 10; // 跳跃速度
     level: number = 1; // 等级
     exp: number = 0; // 经验值
     maxExp: number = 100; // 最大经验值
+
     private _onEvent: Function;
     private _target: any;
 
@@ -73,6 +77,18 @@ export class Player extends Component {
 
 
     protected onLoad(): void {
+        this._playerId = GameContext.selectedPlayerId;
+        switch(this._playerId) {
+            case 0:
+                this._attack1Offset = GameContext.player1Attack1Offset;
+                break;
+            case 1:
+                this._attack1Offset = GameContext.player2Attack1Offset;
+                break;
+            default:
+                this._attack1Offset = GameContext.player1Attack1Offset;
+                break;
+        }
         if (this.ndAni) {
             this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         }
@@ -128,8 +144,8 @@ export class Player extends Component {
         if (this.playerStatus == Constant.CharStatus.ATTACK) return;
 
         this.rb = this.getComponent(RigidBody2D);
-        this.speed = 12;
-        this.jump_speed = 10;
+        // this.speed = 12;
+        // this.jump_speed = 10;
         let lv = this.rb!.linearVelocity;
         let gravity = PhysicsSystem2D.instance.gravity;
 
@@ -185,7 +201,7 @@ export class Player extends Component {
         display.playAnimation('Attack1', 1);
 
         this.callback = this.scheduleOnce(() => {
-            this.updateColliderPosition(this.attack1Collider, 21);
+            this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
             Util.checkCollider(this.attack1Collider, true);
         }, 0.3)
         display.addEventListener(dragonBones.EventObject.COMPLETE, () => {

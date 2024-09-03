@@ -7,5 +7,7 @@ export class GameContext {
   static ndTextParent: Node;
   static player: Player;
   static selectedPlayerId: number = 0;
+  static player1Attack1Offset: number = 14;
+  static player2Attack1Offset: number = 21;
   static ndEnemyParents: Node;
 }

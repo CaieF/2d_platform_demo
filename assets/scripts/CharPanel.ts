@@ -31,7 +31,7 @@ export class CharPanel extends Component {
             this.updateCharItemState();
         });
 
-        this.gotoIndex(1);
+        this.gotoIndex(0);
         this.updateCharItemState();
     }
     start() {

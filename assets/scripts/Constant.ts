@@ -23,6 +23,8 @@ export class Constant {
     DAMAGE_TEXT: 'DamageText',
     PLAYER1: 'Player1',
     PLAYER2: 'Player2',
+    PLAYER1_AVATAR: 'Player1Avatar',
+    PLAYER2_AVATAR: 'Player2Avatar',
     SKELETON: 'Skeleton'
   }
 
