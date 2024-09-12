@@ -1,9 +1,12 @@
-import { _decorator, Collider2D, Component, Contact2DType, dragonBones, IPhysics2DContact, Node, RigidBody2D, Vec2 } from 'cc';
+import { _decorator, Collider2D, Component, Contact2DType, dragonBones, IPhysics2DContact, lerp, Node, RigidBody2D, Vec2 } from 'cc';
 import { Constant } from './Constant';
 import { playIdle, playRun, playTakedamage } from './PlayAnimation';
 import { GameContext } from './GameContext';
 import { Globals } from './Globals';
 import { Util } from './Util';
+import { Arrow } from './Arrow';
+import { Explosion } from './Explosion';
+import { UseSkill } from './UseSkill';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -16,6 +19,8 @@ export class Enemy extends Component {
     private rb: RigidBody2D = null!;
     private attackCollider: Collider2D = null!; // 碰撞器
     private HitCollider: Collider2D = null!; // 受击范围
+    private randomMoveTimer: number = 0; // 随机移动计时器
+    private randomMoveTime: number = 0.5; // 随机移动时间
     speed: number = 10;
     hp:number = 100;
     chaseDistance:number = 200; // 追击距离
@@ -102,6 +107,14 @@ export class Enemy extends Component {
             let lv = this.rb!.linearVelocity;
             const playerPosition = this.getPlayerPosition();
             const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
+
+            if (this.enemyStatus === Constant.CharStatus.IDLE) {
+                this.randomMoveTimer += deltaTime;
+                if (this.randomMoveTimer > this.randomMoveTime) {
+                    this.randomMoveTimer = 0;
+                    lv.x = Math.random() * 2 - 1;
+                }
+            }
             
             if (distanceToPlayer < this.chaseDistance) {
                 if (this.enemyStatus === Constant.CharStatus.IDLE) this.enemyStatus = Constant.CharStatus.RUN;
@@ -124,7 +137,15 @@ export class Enemy extends Component {
             
             } else { // 在追击范围外
                 if (this.enemyStatus === Constant.CharStatus.RUN) this.enemyStatus = Constant.CharStatus.IDLE;
-                lv.x = 0;
+                if (this.enemyStatus === Constant.CharStatus.IDLE) {
+                    this.randomMoveTimer += deltaTime;
+                    if (this.randomMoveTimer > this.randomMoveTime) {
+                        this.randomMoveTimer = 0;
+                        lv.x = (Math.random() * 2 - 1) / 10;
+                    }
+                } else {
+                    lv.x = 0;
+                }
             }
         
             this.rb!.linearVelocity = lv;
@@ -138,9 +159,30 @@ export class Enemy extends Component {
                 switch(other.tag) {
                     case Constant.ColliderTag.PLAYER_ATTACK1:
                         if (this.enemyStatus !== Constant.CharStatus.DEATH) {
-                            this.hurt(40);
+                            this.hurt(1);
                         }
                         break;
+                    case Constant.ColliderTag.PLAYER_ATTACK2:
+                        if (this.enemyStatus !== Constant.CharStatus.DEATH) {
+                            const scaleX = this.node.scale.x; // 获取敌人缩放的X值
+                            const direction = scaleX > 0 ? -1 : 1;
+                            Util.applyKnockback(1000, this.rb!, new Vec2(direction, 0));
+                            this.hurt(1);
+                        }
+                        break;
+                    case Constant.ColliderTag.PLAYER_ATTACK3:
+                        if (this.enemyStatus !== Constant.CharStatus.DEATH) {
+                            if (other.node.getComponent(Arrow).isSkill === true) {
+                                // const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.THUNDER_STRIKE, GameContext.ndWeaponParent);
+                                // ndThunderStrike.worldPosition = other.node.worldPosition;
+                                // ndThunderStrike.getComponent(Explosion).playThunderStrike();
+                                this.hurt(3);
+                            } else {
+                                other.node.getComponent(Arrow).isHit = true;
+                                this.hurt(2);
+                            }
+                            break;
+                        }
                     default:
                         break;
                 }
@@ -153,23 +195,40 @@ export class Enemy extends Component {
                         break;
                 }
             }
-
         }
-        
     }
 
     onEndContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
-        if (other.group === Constant.ColliderGroup.PLAYER) {
+        if (other.group === Constant.ColliderGroup.PLAYER_ATTACK) {
             switch(other.tag) {
                 case Constant.ColliderTag.PLAYER_ATTACK1:
-                    
                     break;
+                case Constant.ColliderTag.PLAYER_ATTACK3:
+                    if (this.enemyStatus !== Constant.CharStatus.DEATH) {
+                        if (other.node.getComponent(Arrow).isSkill === true) {
+                            setTimeout(() => {
+                                const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.THUNDER_STRIKE, GameContext.ndWeaponParent0);
+                                if (ndThunderStrike) {
+                                    ndThunderStrike.worldPosition = self.node.worldPosition;
+                                    ndThunderStrike.getComponent(Explosion).playThunderStrike();
+                                    console.log('闪电');
+                                }
+                            }, 0)
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        } else if (other.group === Constant.ColliderGroup.PLAYER) {
+            switch (other.tag) {
                 case Constant.ColliderTag.PLAYER:
                     contact.disabled = false;
                     break;
                 default:
                     break;
             }
+
         }
     }
 
@@ -202,14 +261,20 @@ export class Enemy extends Component {
         const callback = this.scheduleOnce(() => {
             this.updateColliderPosition(this.attackCollider, 14);
             this.attackCollider.enabled = true;
-        }, 0.7)
+        }, 0.65)
+        this.scheduleOnce(() => {
+            Util.checkCollider(this.attackCollider, false);
+        }, 0.8)
         // this.attackCollider.enabled = false;
-        
-        display.addEventListener(dragonBones.EventObject.COMPLETE, () => {
+
+        const onComplete = () => {
             if (this.hp > 0) this.enemyStatus = Constant.CharStatus.IDLE;
             this.attackCollider.enabled = false;
             this.unschedule(callback);
-        }, this);
+            display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
+        }
+        
+        display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
 
     }
 
@@ -223,9 +288,11 @@ export class Enemy extends Component {
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         display.armatureName = 'TakeDamage';
         display.playAnimation('TakeDamage', 1);
-        display.addEventListener(dragonBones.EventObject.COMPLETE, () => {
+        const onComplete = () => {
             this.enemyStatus = Constant.CharStatus.IDLE;
-        }, this);
+            display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
+        }
+        display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
     }
 
     // 获取角色位置
@@ -237,7 +304,7 @@ export class Enemy extends Component {
     hurt (damage: number) {
         this.hp -= damage;
         Util.showText( `${damage}`, '#FFFFFF' ,this.node.worldPosition, GameContext.ndTextParent);
-        if (this.hp >= 0 && this.enemyStatus !== Constant.CharStatus.ATTACK && this.enemyStatus !== Constant.CharStatus.TAKEDAMAGE) {
+        if (this.hp > 0 && this.enemyStatus !== Constant.CharStatus.ATTACK && this.enemyStatus !== Constant.CharStatus.TAKEDAMAGE) {
             this.enemyStatus = Constant.CharStatus.TAKEDAMAGE;
         } else if (this.hp <= 0) {
             this._cb && this._cb.apply(this._target, [Enemy.Event.DEATH])

@@ -6,7 +6,7 @@ export class Util {
   
   // 给墙体添加碰撞组件
   static setWall(Map: TiledMap) {
-    PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
+    // PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
     
     // 获取地图墙体
     let tiledSize:Size = Map.getTileSize(); // 得到每一小块的大小
@@ -68,4 +68,28 @@ export class Util {
       })
       .start();
   }
+
+  // 节点移动
+  static moveNode(node: Node, moveDirection: number, speed: number) {
+    const x = node.position.x + moveDirection * speed;
+    const y = node.position.y;
+    node.setPosition(x, y);
+  }
+
+  // 击退敌人效果
+  static applyKnockback(knockbackForce: number, rigid: RigidBody2D, Direction: Vec2) {
+    const knockbackDirection = Direction.normalize();
+    if (rigid) {
+      rigid.applyForceToCenter(knockbackDirection.multiplyScalar(knockbackForce), true);
+    }
+  }
+
+  // 吸引敌人效果
+  // static applyAttraction(attractionForce: number, rigid: RigidBody2D, targetPos: Vec3) {
+  //   if (rigid) {
+  //     const direction = targetPos.sub(rigid.position);
+  //     const force = direction.normalize().multiplyScalar(attractionForce);
+  //     rigid.applyForceToCenter(force, true);
+  //   }
+  // }
 }

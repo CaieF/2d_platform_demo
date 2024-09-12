@@ -1,7 +1,9 @@
-import { _decorator, clamp, Component, Node, tween, UIOpacity, Vec3 } from 'cc';
+import { _decorator, clamp, Component, KeyCode, Node, tween, UIOpacity, Vec3 } from 'cc';
 import { NormalButton } from './NormalButton';
 import { Constant } from './Constant';
+import { AxInput } from './AxInput';
 const { ccclass, property } = _decorator;
+const axInput = AxInput.instance;
 
 @ccclass('CharPanel')
 export class CharPanel extends Component {
@@ -26,19 +28,30 @@ export class CharPanel extends Component {
             this.updateCharItemState();
         });
 
+        this.ndBtnLeft.getComponent(NormalButton).onKeyLeft(() => {
+            this.moveLeft();
+            this.updateCharItemState();
+        })
+
         this.ndBtnRight.getComponent(NormalButton).onClick(() => {
             this.moveRight();
             this.updateCharItemState();
         });
 
-        this.gotoIndex(0);
+        this.ndBtnRight.getComponent(NormalButton).onKeyRight(() => {
+            this.moveRight();
+            this.updateCharItemState();
+        })
+
+        this.gotoIndex(2);
         this.updateCharItemState();
     }
     start() {
 
     }
 
-    update(deltaTime: number) {    
+    update(deltaTime: number) {
+        // if (axInput.is_action_just_pressed(KeyCode.KEY_W) || axInput.is_action_just_pressed) {}
     }
 
     gotoIndex(index: number) {
