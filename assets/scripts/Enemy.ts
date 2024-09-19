@@ -173,13 +173,10 @@ export class Enemy extends Component {
                     case Constant.ColliderTag.PLAYER_ATTACK3:
                         if (this.enemyStatus !== Constant.CharStatus.DEATH) {
                             if (other.node.getComponent(Arrow).isSkill === true) {
-                                // const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.THUNDER_STRIKE, GameContext.ndWeaponParent);
-                                // ndThunderStrike.worldPosition = other.node.worldPosition;
-                                // ndThunderStrike.getComponent(Explosion).playThunderStrike();
                                 this.hurt(3);
                             } else {
                                 other.node.getComponent(Arrow).isHit = true;
-                                this.hurt(2);
+                                this.hurt(100);
                             }
                             break;
                         }
@@ -207,12 +204,11 @@ export class Enemy extends Component {
                     if (this.enemyStatus !== Constant.CharStatus.DEATH) {
                         if (other.node.getComponent(Arrow).isSkill === true) {
                             setTimeout(() => {
-                                const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.THUNDER_STRIKE, GameContext.ndWeaponParent0);
-                                if (ndThunderStrike) {
-                                    ndThunderStrike.worldPosition = self.node.worldPosition;
-                                    ndThunderStrike.getComponent(Explosion).playThunderStrike();
-                                    console.log('闪电');
-                                }
+                                UseSkill.shootThunderStrike(self.node.worldPosition);
+                            }, 0)
+                        } else if(other.node.getComponent(Arrow).isFireBall === true) {
+                            setTimeout(() => {
+                                UseSkill.redExplosion(self.node.worldPosition, 1);
                             }, 0)
                         }
                     }

@@ -10,10 +10,13 @@ export class Arrow extends Component {
     isMoving: boolean = true;
     isSkill: boolean = false;// 是否是技能,技能可穿透
     isHit: boolean = false; // 是否击中敌人
+    isFireBall: boolean = false; // 是否是火球
 
     private _distance: number = 0;
     protected onEnable(): void {
         this._distance = 0;
+        this.isHit = false;
+        this.isFireBall = false;
     }
     start() {
 
@@ -30,10 +33,11 @@ export class Arrow extends Component {
             this._distance += this.speed;
         }
         // 普通攻击击中敌人就移除
-        if (!this.isSkill && this.isHit) {
+        if (this.isHit && !this.isSkill) {
             Globals.putNode(this.node);
         }
         
+        // 超过一定距离就移除
         if (this._distance > 500 && !this.isHit) {
             Globals.putNode(this.node);
         }

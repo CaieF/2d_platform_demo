@@ -170,7 +170,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "671aeb99-c478-438f-ae68-95b5eb9fdd43@f9941",
+      "__uuid__": "71cc4629-9ae2-43aa-8d6e-710398266c5d@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -306,7 +306,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "05bbe4aa-6b59-4476-b30f-7333160fd3e8@f9941",
+      "__uuid__": "8b567a13-7a68-4728-bc7d-2a7dfad61c56@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 3,
@@ -405,8 +405,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 120.64279135815912,
-      "height": 54.39999999999999
+      "width": 82.94105816831683,
+      "height": 22.9
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -444,14 +444,17 @@
     "_string": "游戏加载中...",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 26.90625,
+    "_actualFontSize": 23.671875,
     "_fontSize": 20,
     "_fontFamily": "Arial",
-    "_lineHeight": 40,
+    "_lineHeight": 15,
     "_overflow": 0,
     "_enableWrapText": true,
-    "_font": null,
-    "_isSystemFontUsed": true,
+    "_font": {
+      "__uuid__": "dddda381-2777-432c-ae4f-2e8100dfc988",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
     "_isBold": true,
@@ -561,6 +564,7 @@
       "__id__": 0
     },
     "fileId": "c46/YsCPVOJYA4mWEpNYRx",
+    "instance": null,
     "targetOverrides": null
   }
 ]

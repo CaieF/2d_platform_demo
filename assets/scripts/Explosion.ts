@@ -36,6 +36,11 @@ export class Explosion extends Component {
         const dis = this.node.getComponent(dragonBones.ArmatureDisplay);
         dis.playAnimation('ThunderStrike', 1);
     }
+
+    playThunderSplash() {
+        const dis = this.node.getComponent(dragonBones.ArmatureDisplay);
+        dis.playAnimation('ThunderSplash', 1);
+    }
 }
 
 

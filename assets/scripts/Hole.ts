@@ -4,6 +4,7 @@ import { Constant } from './Constant';
 import { Globals } from './Globals';
 import { Util } from './Util';
 import { Explosion } from './Explosion';
+import { UseSkill } from './UseSkill';
 const { ccclass, property } = _decorator;
 
 @ccclass('Hole')
@@ -35,9 +36,10 @@ export class Hole extends Component {
             }
             this._distance += this.speed;
             if (this._distance > 200) {
-                const ndExplode = Globals.getNode(Constant.PrefabUrl.RED_EXPLOSION, GameContext.ndWeaponParent);
-                ndExplode.worldPosition = this.node.worldPosition;
-                ndExplode.getComponent(Explosion).playRedExplosion();
+                // const ndExplode = Globals.getNode(Constant.PrefabUrl.RED_EXPLOSION, GameContext.ndWeaponParent);
+                // ndExplode.worldPosition = this.node.worldPosition;
+                // ndExplode.getComponent(Explosion).playRedExplosion();
+                UseSkill.redExplosion(this.node.worldPosition, 2);
                 Globals.putNode(this.node);
 
             }

@@ -12,37 +12,55 @@ export class Start extends Component {
     @property(Node) ndBar: Node;
     @property(Node) ndCharPanel: Node;
     @property(Label) ndTips: Label;
+    // private isFirstLoad: boolean = true; // 是否是第一次加载
 
     start() {
-        this.ndTips.string = '请等待游戏加载...';
+        // console.log(this.isFirstLoad);
         
-        Globals.init().then(() => {
-            this.scheduleOnce(() => {
-                this.ndButtonStartGame.active = true;
-                this.ndCharPanel.active = true;
-                this.ndBar.active = false;
-                this.ndTips.string = '按下A/D键切换角色，空格键开始游戏';
-                
-                this.ndButtonStartGame.getComponent(NormalButton).onClick(() => {
-                    this.startGame();
-                })
+        if (GameContext.isFirstLoad) {
+            GameContext.isFirstLoad = false;
+            this.ndTips.string = '请等待游戏加载...';
+        
+            Globals.init().then(() => {
+                this.scheduleOnce(() => {
+                    this.ndButtonStartGame.active = true;
+                    this.ndCharPanel.active = true;
+                    this.ndBar.active = false;
+                    this.ndTips.string = '按下A/D键切换角色，空格键开始游戏';
 
-                this.ndButtonStartGame.getComponent(NormalButton).onKeySpace(() => {
-                    this.startGame();
-                })
+                    this.ndButtonStartGame.getComponent(NormalButton).onClick(() => {
+                        this.startGame();
+                    })
 
-            }, 1.1);
-            // const ndBar = this.node.getChildByName('LoadingBar');
-            let prgs = 0;
-            this.ndBar.getComponent(ProgressBar).setProgress(prgs);
-            let ac = tween(this.ndBar)
-                .delay(0.1)
-                .call(() => {
-                    prgs += 0.1;
-                    this.ndBar.getComponent(ProgressBar).setProgress(prgs);
-                });
-            tween(this.ndBar).repeat(10, ac).start();
-        })
+                    this.ndButtonStartGame.getComponent(NormalButton).onKeySpace(() => {
+                        this.startGame();
+                    })
+
+                }, 1.1);
+                // const ndBar = this.node.getChildByName('LoadingBar');
+                let prgs = 0;
+                this.ndBar.getComponent(ProgressBar).setProgress(prgs);
+                let ac = tween(this.ndBar)
+                    .delay(0.1)
+                    .call(() => {
+                        prgs += 0.1;
+                        this.ndBar.getComponent(ProgressBar).setProgress(prgs);
+                    });
+                tween(this.ndBar).repeat(10, ac).start();
+            })
+        } else {
+            this.ndButtonStartGame.active = true;
+            this.ndCharPanel.active = true;
+            this.ndBar.active = false;
+            this.ndTips.string = '按下A/D键切换角色，空格键开始游戏';
+            this.ndButtonStartGame.getComponent(NormalButton).onClick(() => {
+                this.startGame();
+            })
+            this.ndButtonStartGame.getComponent(NormalButton).onKeySpace(() => {
+                this.startGame();
+            })
+        }
+        
     }
 
     update(deltaTime: number) {

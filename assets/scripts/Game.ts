@@ -1,4 +1,4 @@
-import { _decorator, Component, Label, Node, randomRangeInt, Slider, TiledMap } from 'cc';
+import { _decorator, Component, director, Label, Node, randomRangeInt, Slider, TiledMap } from 'cc';
 import { Util } from './Util';
 import { GameContext } from './GameContext';
 import { Player } from './Player';
@@ -8,6 +8,8 @@ import { Enemy } from './Enemy';
 import { ProgressBar } from './ProgressBar';
 import { SkillButton } from './SkillButton';
 import { CharData } from './CharData';
+import { NormalButton } from './NormalButton';
+import { SoundBar } from './SoundBar';
 const { ccclass, property } = _decorator;
 
 @ccclass('Game')
@@ -19,6 +21,8 @@ export class Game extends Component {
     @property(Node) ndPlayerMessage: Node;
     @property(Node) ndWeaponParent: Node;
     @property(Node) ndWeaponParent0: Node;
+    @property(Node) ndBtnSettingButton: Node; // 设置按钮
+    @property(Node) ndSettingPanel: Node; // 设置面板
 
     private _ndLifeBar: Node;
     private _ndExpBar: Node;
@@ -29,22 +33,89 @@ export class Game extends Component {
     private _sk2Button: SkillButton;
     private _sk3Button: SkillButton;
 
+    private _ndButton: Node;
+    private _ndSoundBar: Node; // 音量条
+    private _ndCancelButton: Node; // 取消按钮
+    private _ndOKButton: Node; // 确定按钮
+    private _ndHomeButton: Node; // 返回按钮
+    private _ndReloadButton: Node; // 重新开始按钮
+    private _ndNoSoundButton: Node; // 关闭音效按钮
+    private _ndMaxSoundButton: Node; // 开启音效按钮
+
     protected onLoad() {
+        // 相关父节点赋值
         GameContext.ndPlayerParents = this.ndPlayerParents;
         GameContext.ndTextParent = this.ndTextParent; 
         this._loadPlayer();
         GameContext.ndEnemyParents = this.ndEnemyParents;
         GameContext.ndWeaponParent = this.ndWeaponParent;
         GameContext.ndWeaponParent0 = this.ndWeaponParent0;
+        GameContext.GameStatus = Constant.GameStatus.RUNNING;
 
+        // 生命条 经验条
         this._ndLifeBar = this.ndPlayerMessage.getChildByName('LifeBar');
         this._ndExpBar = this.ndPlayerMessage.getChildByName('ExpBar');
         this._ndLevel = this.ndPlayerMessage.getChildByName('Level');
+        
 
+
+        // 相关按钮
+        this._ndButton = this.ndSettingPanel.getChildByName('Button');
+        this._ndSoundBar = this.ndSettingPanel.getChildByName('SoundBar'); // 音量条
+        this._ndOKButton = this._ndButton.getChildByName('OkButton'); // 确定按钮
+        this._ndCancelButton = this._ndButton.getChildByName('CancelButton'); // 取消按钮
+        this._ndHomeButton = this._ndButton.getChildByName('HomeButton'); // 返回按钮
+        this._ndReloadButton = this._ndButton.getChildByName('ReloadingButton'); // 重新开始按钮
+        this._ndNoSoundButton = this._ndButton.getChildByName('NoSoundButton'); // 关闭音效按钮
+        this._ndMaxSoundButton = this._ndButton.getChildByName('MaxSoundButton'); // 开启音效按钮
     }
 
     protected onEnable(): void {
         this._rebindSkillButtons();
+        // 设置按钮键盘事件
+        this.ndBtnSettingButton.getComponent(NormalButton).onKeyEsc(() => {
+            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            Util.applyPause();
+            this.ndSettingPanel.active = !this.ndSettingPanel.active;
+        })
+        // 设置按钮点击事件
+        this.ndBtnSettingButton.getComponent(NormalButton).onClick(() => {
+            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            Util.applyPause();
+            this.ndSettingPanel.active = !this.ndSettingPanel.active;
+        })
+        // 确定按钮点击事件
+        this._ndOKButton.getComponent(NormalButton).onClick(() => {
+            Util.applyResume();
+            this.ndSettingPanel.active = !this.ndSettingPanel.active;
+        })
+        // 取消按钮点击事件
+        this._ndCancelButton.getComponent(NormalButton).onClick(() => {
+            Util.applyResume();
+            this.ndSettingPanel.active = !this.ndSettingPanel.active;
+        })
+        // 返回按钮点击事件
+        this._ndHomeButton.getComponent(NormalButton).onClick(() => {
+            Util.applyResume();
+            director.loadScene('Start');
+        })
+        // 重新开始按钮点击事件
+        this._ndReloadButton.getComponent(NormalButton).onClick(() => {
+            Util.applyResume();
+            director.loadScene('Game');
+        })
+        // 点击关闭音效按钮事件
+        this._ndNoSoundButton.getComponent(NormalButton).onClick(() => {
+            this._ndNoSoundButton.active = false;
+            this._ndMaxSoundButton.active = true;
+            this._ndSoundBar.getComponent(SoundBar).updateVolumeLabel(1);
+        })
+        // 点击开启音效按钮事件
+        this._ndMaxSoundButton.getComponent(NormalButton).onClick(() => {
+            this._ndNoSoundButton.active = true;
+            this._ndMaxSoundButton.active = false;
+            this._ndSoundBar.getComponent(SoundBar).updateVolumeLabel(0);
+        })
 
         // 生命条
         const lifeBar = this._ndLifeBar.getComponent(ProgressBar);
@@ -122,45 +193,20 @@ export class Game extends Component {
 
     // 加载角色
     private _loadPlayer() {
-        let playerPrefabUrl = Constant.PrefabUrl.PLAYER1; // 角色预制体
-        let playerAvatarPrefabUrl = Constant.PrefabUrl.PLAYER1_AVATAR; // 角色头像预制体
-        let SkillBarPrefabUrl = Constant.PrefabUrl.SKILL_BAR1; // 技能预制体
-        let hp: number = 100;
-        let speed: number = 12;
-        let jump_speed: number = 10;
+        
+        const defaultPlayerId = CharData.Player1.playerId; // 默认角色ID
+        const selectedPlayerId = GameContext.selectedPlayerId;
 
-        switch(GameContext.selectedPlayerId) {
-            case 0:
-                // 骑士猫
-                playerPrefabUrl = Constant.PrefabUrl.PLAYER1;
-                playerAvatarPrefabUrl = Constant.PrefabUrl.PLAYER1_AVATAR;
-                SkillBarPrefabUrl = Constant.PrefabUrl.SKILL_BAR1;
-                hp = CharData.Player1.hp;
-                speed = CharData.Player1.speed;
-                jump_speed = CharData.Player1.jump_speed;
-                break;
-            case 1:
-                // 国王猫
-                playerPrefabUrl = Constant.PrefabUrl.PLAYER2;
-                playerAvatarPrefabUrl = Constant.PrefabUrl.PLAYER2_AVATAR;
-                SkillBarPrefabUrl = Constant.PrefabUrl.SKILL_BAR2;
-                hp = CharData.Player2.hp;
-                speed = CharData.Player2.speed;
-                jump_speed = CharData.Player2.jump_speed;
-                break;
-            case 2:
-                // 猎人喵
-                playerPrefabUrl = Constant.PrefabUrl.PLAYER3;
-                playerAvatarPrefabUrl = Constant.PrefabUrl.PLAYER3_AVATAR;
-                SkillBarPrefabUrl = Constant.PrefabUrl.SKILL_BAR3;
-                hp = CharData.Player3.hp;
-                speed = CharData.Player3.speed;
-                jump_speed = CharData.Player3.jump_speed;
-                break;
-            default:
-                playerPrefabUrl = Constant.PrefabUrl.PLAYER1;
-                break;
-        }
+        // 获取角色配置
+        const playerConfigData = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
+
+        const playerPrefabUrl = playerConfigData.prefabUrl;
+        const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
+        const SkillBarPrefabUrl = playerConfigData.skillBarUrl;
+
+        const hp = playerConfigData.hp;
+        const speed = playerConfigData.speed;
+        const jump_speed = playerConfigData.jump_speed;
         // 角色
         const playerNode = Globals.getNode(playerPrefabUrl, GameContext.ndPlayerParents);
         if (playerNode) {
@@ -174,11 +220,11 @@ export class Game extends Component {
             playerAvatarNode.setPosition(-30, 0);
         }
         // 技能栏
-        const skillBarNode = Globals.getNode(SkillBarPrefabUrl, this.node);
+        const skillBarNode = Globals.getNode(SkillBarPrefabUrl, this.ndPlayerMessage);
         
         if (skillBarNode) {
             skillBarNode.setScale(0.5, 0.5);
-            skillBarNode.setPosition(-150, -130)
+            skillBarNode.setPosition(-10, -270)
             const skillButtons = skillBarNode.getComponentsInChildren(SkillButton);
             this._sk0Button = skillButtons[0];
             this._sk1Button = skillButtons[1];
@@ -214,6 +260,12 @@ export class Game extends Component {
                 break;
             case CharData.Player2.playerId:
                 this._setSkillColdDown(CharData.Player2.sk0Cd, CharData.Player2.sk1Cd, CharData.Player2.sk2Cd, CharData.Player2.sk3Cd)
+                break;
+            case CharData.Player3.playerId:
+                this._setSkillColdDown(CharData.Player3.sk0Cd, CharData.Player3.sk1Cd, CharData.Player3.sk2Cd, CharData.Player3.sk3Cd)
+                break;
+            case CharData.Player4.playerId:
+                this._setSkillColdDown(CharData.Player4.sk0Cd, CharData.Player4.sk1Cd, CharData.Player4.sk2Cd, CharData.Player4.sk3Cd)
                 break;
             default:
                 break;

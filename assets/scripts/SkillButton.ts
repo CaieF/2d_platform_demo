@@ -1,4 +1,6 @@
 import { _decorator, Component, EventKeyboard, Input, input, KeyCode, Label, Node, Sprite } from 'cc';
+import { GameContext } from './GameContext';
+import { Constant } from './Constant';
 const { ccclass, property } = _decorator;
 
 @ccclass('SkillButton')
@@ -89,6 +91,7 @@ export class SkillButton extends Component {
     }
 
     onKeyDown(event: EventKeyboard) {
+        if (GameContext.GameStatus === Constant.GameStatus.PAUSE) { return; }
         if (!this.isAvaliable) { return; }
         switch (event.keyCode) {
             case KeyCode.KEY_U:

@@ -1,12 +1,13 @@
-import { BoxCollider2D, Collider2D, EPhysics2DDrawFlags, ERigidBody2DType, Label, math, Node, PhysicsSystem2D, randomRangeInt, RigidBody2D, Size, TiledLayer, TiledMap, tween, UITransform, v3, Vec2, Vec3 } from "cc";
+import { BoxCollider2D, Collider2D, director, EPhysics2DDrawFlags, ERigidBody2DType, Label, math, Node, PhysicsSystem2D, randomRangeInt, RigidBody2D, Size, TiledLayer, TiledMap, tween, UITransform, v3, Vec2, Vec3 } from "cc";
 import { Constant } from "./Constant";
 import { Globals } from "./Globals";
+import { GameContext } from "./GameContext";
 
 export class Util {
   
   // 给墙体添加碰撞组件
   static setWall(Map: TiledMap) {
-    // PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
+    PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
     
     // 获取地图墙体
     let tiledSize:Size = Map.getTileSize(); // 得到每一小块的大小
@@ -82,6 +83,18 @@ export class Util {
     if (rigid) {
       rigid.applyForceToCenter(knockbackDirection.multiplyScalar(knockbackForce), true);
     }
+  }
+
+  // 游戏暂停效果
+  static applyPause() {
+    GameContext.GameStatus = Constant.GameStatus.PAUSE;
+    director.pause();
+  }
+
+  // 游戏继续效果
+  static applyResume() {
+    GameContext.GameStatus = Constant.GameStatus.RUNNING;
+    director.resume();
   }
 
   // 吸引敌人效果

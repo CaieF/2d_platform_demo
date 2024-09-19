@@ -11,6 +11,7 @@ export class NormalButton extends Component {
     private _LeftCb: Function;
     private _RightCb: Function;
     private _SpaceCb: Function;
+    private _EscCb: Function;
 
     public get isActivated(): boolean {
         return this._isActivated;
@@ -19,9 +20,9 @@ export class NormalButton extends Component {
     public set isActivated(value: boolean) {
         this._isActivated = value;
 
-        this.node.getComponentsInChildren(Sprite).forEach((s: Sprite) => {
-            s.grayscale = !value;
-        })
+        // this.node.getComponentsInChildren(Sprite).forEach((s: Sprite) => {
+        //     s.grayscale = !value;
+        // })
     }
 
     protected onEnable(): void {
@@ -72,6 +73,8 @@ export class NormalButton extends Component {
             case KeyCode.SPACE:
                 this._SpaceCb && this.node.setScale(0.98, 0.98);
                 break;
+            case KeyCode.ESCAPE:
+                this._EscCb && this.node.setScale(0.98, 0.98);
             default:
                 break;
         }
@@ -91,6 +94,9 @@ export class NormalButton extends Component {
             case KeyCode.SPACE:
                 this.node.setScale(1, 1);
                 this._SpaceCb && this._SpaceCb.apply(this._KeyTarget);
+            case KeyCode.ESCAPE:
+                this.node.setScale(1, 1);
+                this._EscCb && this._EscCb.apply(this._KeyTarget);
             default:
                 break;
         }
@@ -118,6 +124,12 @@ export class NormalButton extends Component {
     // 空格键
     onKeySpace(cb: Function, target?: any) {
         this._SpaceCb = cb;
+        this._KeyTarget = target;
+    }
+
+    // esc键
+    onKeyEsc(cb: Function, target?: any) {
+        this._EscCb = cb;
         this._KeyTarget = target;
     }
 

@@ -2,6 +2,7 @@ import { _decorator, clamp, Component, KeyCode, Node, tween, UIOpacity, Vec3 } f
 import { NormalButton } from './NormalButton';
 import { Constant } from './Constant';
 import { AxInput } from './AxInput';
+import { GameContext } from './GameContext';
 const { ccclass, property } = _decorator;
 const axInput = AxInput.instance;
 
@@ -43,7 +44,7 @@ export class CharPanel extends Component {
             this.updateCharItemState();
         })
 
-        this.gotoIndex(2);
+        this.gotoIndex(GameContext.selectedPlayerId);
         this.updateCharItemState();
     }
     start() {

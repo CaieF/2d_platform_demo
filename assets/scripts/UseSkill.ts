@@ -74,9 +74,41 @@ export class UseSkill{
   }
 
   // 发送闪电
-  // static shootThunder(position: Vec3) {
-  //   const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.THUNDER_STRIKE, GameContext.ndWeaponParent);
-  //   ndThunderStrike.worldPosition = position;
-  //   ndThunderStrike.getComponent(Explosion).playThunderStrike();
-  // }
+  static shootThunderStrike(position: Vec3) {
+    const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.THUNDER_STRIKE, GameContext.ndWeaponParent0);
+    ndThunderStrike.worldPosition = position;
+    ndThunderStrike.getComponent(Explosion).playThunderStrike();
+  }
+
+  static shootThunderSplash(position: Vec3, scaleX: number) {
+    const ndThunderStrike = Globals.getNode(Constant.PrefabUrl.PLAYER3_SKILL1, GameContext.ndWeaponParent);
+    ndThunderStrike.worldPosition = position;
+    ndThunderStrike.scale = (new Vec3(scaleX * 2, 2, 0));
+    ndThunderStrike.getComponent(Explosion).playThunderSplash();
+  }
+
+  // 发送火焰球
+  static shootFireBall(position: Vec3, scaleX: number) {
+    console.log("shootFireBall", position);
+    
+    const ndFireBall = Globals.getNode(Constant.PrefabUrl.FIRE_BALL, GameContext.ndWeaponParent);
+    console.log("ndFireBall", ndFireBall);
+    
+    ndFireBall.worldPosition = position;
+    ndFireBall.scale = (new Vec3(scaleX * 4, 4, 0));
+    const pk = ndFireBall.getComponent(Arrow);
+    pk.isMoving = true;
+    pk.isSkill = false;
+    pk.isMoveLeft = scaleX < 0 ? true : false;
+    pk.speed = 6;
+    pk.isHit = false;
+    pk.isFireBall = true;
+  }
+
+  static redExplosion(position: Vec3, scale: number) {
+    const ndRedExplosion = Globals.getNode(Constant.PrefabUrl.RED_EXPLOSION, GameContext.ndWeaponParent0);
+    ndRedExplosion.worldPosition = position;
+    ndRedExplosion.scale = (new Vec3(scale, scale, 0));
+    ndRedExplosion.getComponent(Explosion).playRedExplosion();
+  }
 }

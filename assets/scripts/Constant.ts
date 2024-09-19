@@ -28,18 +28,26 @@ export class Constant {
     PLAYER1: 'Player1', // 角色1
     PLAYER2: 'Player2', // 角色2
     PLAYER3: 'Player3', // 角色3
+    PLAYER4: 'Player4', // 角色4
+    PLAYER5: 'Player5', // 角色5
     PLAYER1_AVATAR: 'Player1Avatar', // 角色1头像
     PLAYER2_AVATAR: 'Player2Avatar', // 角色2头像
     PLAYER3_AVATAR: 'Player3Avatar', // 角色3头像
+    PLAYER4_AVATAR: 'Player4Avatar', // 角色4头像
+    PLAYER5_AVATAR: 'Player5Avatar', // 角色4头像
     PLAYER1_SKILL0: 'Player1Skill0', // 角色1技能0
     PLAYER1_SKILL1: 'Player1Skill1', // 角色1技能1
     PLAYER2_SKILL0: 'Player2Skill0', // 角色2技能0
     PLAYER2_SKILL1: 'Player2Skill1', // 角色2技能1
     PLAYER3_SKILL0: 'Player3Skill0', // 角色3技能0
+    PLAYER3_SKILL1: 'Player3Skill1', // 角色3技能1
     SKILL_BAR1: 'SkillBar1', // 角色1技能栏
     SKILL_BAR2: 'SkillBar2', // 角色2技能栏
     SKILL_BAR3: 'SkillBar3', // 角色3技能栏
+    SKILL_BAR4: 'SkillBar4', // 角色4技能栏
+    SKILL_BAR5: 'SkillBar4', // 角色5技能栏
     ARROW: 'Arrow', // 箭矢
+    FIRE_BALL: 'FireBall', // 火球
     THUNDER_STRIKE: 'ThunderStrike', // 闪电
     RED_EXPLOSION: 'RedExplosion', // 红色爆炸
     SKELETON: 'Skeleton' // 骷髅
@@ -55,5 +63,9 @@ export class Constant {
     ENEMY_ATTACK1:11,
   }
 
-
+  // 游戏状态
+  static readonly GameStatus = {
+    RUNNING: 0, // 运行
+    PAUSE: 1, // 暂停
+  }
 }

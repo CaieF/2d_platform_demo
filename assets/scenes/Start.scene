@@ -20,13 +20,13 @@
         "__id__": 2
       },
       {
-        "__id__": 50
+        "__id__": 55
       }
     ],
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 52
+      "__id__": 57
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -57,7 +57,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 53
+      "__id__": 58
     },
     "_id": "cb5f1d4e-dafe-42d3-8e20-55c5e77ee93a"
   },
@@ -86,25 +86,25 @@
         "__id__": 22
       },
       {
-        "__id__": 32
+        "__id__": 30
       },
       {
-        "__id__": 43
+        "__id__": 48
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 46
+        "__id__": 51
       },
       {
-        "__id__": 47
+        "__id__": 52
       },
       {
-        "__id__": 48
+        "__id__": 53
       },
       {
-        "__id__": 49
+        "__id__": 54
       }
     ],
     "_prefab": null,
@@ -430,8 +430,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 306.82,
-      "height": 50
+      "width": 357.8465659292162,
+      "height": 104.8
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -460,27 +460,27 @@
       "b": 255,
       "a": 255
     },
-    "_string": "进",
+    "_string": "进 击 的 野 猫",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 60,
-    "_fontSize": 60,
+    "_actualFontSize": 100,
+    "_fontSize": 80,
     "_fontFamily": "Arial",
-    "_lineHeight": 50,
+    "_lineHeight": 80,
     "_overflow": 0,
     "_enableWrapText": true,
     "_font": {
-      "__uuid__": "ddc919e9-700b-44f6-ab51-e2cfa9245b93",
-      "__expectedType__": "cc.LabelAtlas"
+      "__uuid__": "dddda381-2777-432c-ae4f-2e8100dfc988",
+      "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
-    "_isItalic": false,
-    "_isBold": false,
+    "_isItalic": true,
+    "_isBold": true,
     "_isUnderline": false,
     "_underlineHeight": 2,
     "_cacheMode": 0,
-    "_enableOutline": false,
+    "_enableOutline": true,
     "_outlineColor": {
       "__type__": "cc.Color",
       "r": 0,
@@ -691,9 +691,6 @@
       },
       {
         "__id__": 29
-      },
-      {
-        "__id__": 30
       }
     ],
     "removedComponents": []
@@ -761,40 +758,20 @@
     }
   },
   {
-    "__type__": "CCPropertyOverrideInfo",
-    "targetInfo": {
-      "__id__": 31
-    },
-    "propertyPath": [
-      "_contentSize"
-    ],
-    "value": {
-      "__type__": "cc.Size",
-      "width": 120.64279135815912,
-      "height": 54.39999999999999
-    }
-  },
-  {
-    "__type__": "cc.TargetInfo",
-    "localID": [
-      "8bFvQqNIpOsb1KshS/+Wrg"
-    ]
-  },
-  {
     "__type__": "cc.Node",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
     },
     "_prefab": {
-      "__id__": 33
+      "__id__": 31
     },
     "__editorExtras__": {}
   },
   {
     "__type__": "cc.PrefabInfo",
     "root": {
-      "__id__": 32
+      "__id__": 30
     },
     "asset": {
       "__uuid__": "46b4cfc3-8323-44e4-b134-ffd50555d5ff",
@@ -802,7 +779,7 @@
     },
     "fileId": "38TXm5H2BJ26LO+glVP9xs",
     "instance": {
-      "__id__": 34
+      "__id__": 32
     },
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
@@ -815,7 +792,13 @@
     "mountedComponents": [],
     "propertyOverrides": [
       {
+        "__id__": 33
+      },
+      {
         "__id__": 35
+      },
+      {
+        "__id__": 36
       },
       {
         "__id__": 37
@@ -827,10 +810,22 @@
         "__id__": 39
       },
       {
-        "__id__": 40
+        "__id__": 41
       },
       {
-        "__id__": 41
+        "__id__": 43
+      },
+      {
+        "__id__": 44
+      },
+      {
+        "__id__": 45
+      },
+      {
+        "__id__": 46
+      },
+      {
+        "__id__": 47
       }
     ],
     "removedComponents": []
@@ -838,7 +833,7 @@
   {
     "__type__": "CCPropertyOverrideInfo",
     "targetInfo": {
-      "__id__": 36
+      "__id__": 34
     },
     "propertyPath": [
       "_name"
@@ -854,7 +849,7 @@
   {
     "__type__": "CCPropertyOverrideInfo",
     "targetInfo": {
-      "__id__": 36
+      "__id__": 34
     },
     "propertyPath": [
       "_lpos"
@@ -869,7 +864,7 @@
   {
     "__type__": "CCPropertyOverrideInfo",
     "targetInfo": {
-      "__id__": 36
+      "__id__": 34
     },
     "propertyPath": [
       "_lrot"
@@ -885,7 +880,7 @@
   {
     "__type__": "CCPropertyOverrideInfo",
     "targetInfo": {
-      "__id__": 36
+      "__id__": 34
     },
     "propertyPath": [
       "_euler"
@@ -900,7 +895,7 @@
   {
     "__type__": "CCPropertyOverrideInfo",
     "targetInfo": {
-      "__id__": 36
+      "__id__": 34
     },
     "propertyPath": [
       "_active"
@@ -910,15 +905,15 @@
   {
     "__type__": "CCPropertyOverrideInfo",
     "targetInfo": {
-      "__id__": 42
+      "__id__": 40
     },
     "propertyPath": [
       "_contentSize"
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 83.97687381404175,
-      "height": 54.4
+      "width": 136.62539924506387,
+      "height": 54.39999999999999
     }
   },
   {
@@ -926,6 +921,75 @@
     "localID": [
       "5fVaaPqV1D0bgmlNLPcInS"
     ]
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 42
+    },
+    "propertyPath": [
+      "_isSystemFontUsed"
+    ],
+    "value": false
+  },
+  {
+    "__type__": "cc.TargetInfo",
+    "localID": [
+      "beQut4eHhOML5s2fsFHQNu"
+    ]
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 42
+    },
+    "propertyPath": [
+      "_actualFontSize"
+    ],
+    "value": 53.8125
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 42
+    },
+    "propertyPath": [
+      "_font"
+    ],
+    "value": {
+      "__uuid__": "dddda381-2777-432c-ae4f-2e8100dfc988",
+      "__expectedType__": "cc.TTFFont"
+    }
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 42
+    },
+    "propertyPath": [
+      "_fontSize"
+    ],
+    "value": 40
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 42
+    },
+    "propertyPath": [
+      "_lineHeight"
+    ],
+    "value": 40
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 42
+    },
+    "propertyPath": [
+      "_string"
+    ],
+    "value": "开 始 游 戏"
   },
   {
     "__type__": "cc.Node",
@@ -939,10 +1003,10 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 44
+        "__id__": 49
       },
       {
-        "__id__": 45
+        "__id__": 50
       }
     ],
     "_prefab": null,
@@ -981,14 +1045,14 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 43
+      "__id__": 48
     },
     "_enabled": true,
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 119.97209821428572,
-      "height": 12.6
+      "width": 113.64,
+      "height": 15
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1003,7 +1067,7 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 43
+      "__id__": 48
     },
     "_enabled": true,
     "__prefab": null,
@@ -1020,20 +1084,23 @@
     "_string": "按空格或点击按钮开始游戏",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 13.453125,
-    "_fontSize": 10,
+    "_actualFontSize": 15,
+    "_fontSize": 15,
     "_fontFamily": "Arial",
-    "_lineHeight": 10,
+    "_lineHeight": 15,
     "_overflow": 0,
     "_enableWrapText": true,
-    "_font": null,
-    "_isSystemFontUsed": true,
+    "_font": {
+      "__uuid__": "dddda381-2777-432c-ae4f-2e8100dfc988",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
     "_isBold": false,
     "_isUnderline": false,
     "_underlineHeight": 2,
-    "_cacheMode": 0,
+    "_cacheMode": 2,
     "_enableOutline": false,
     "_outlineColor": {
       "__type__": "cc.Color",
@@ -1138,7 +1205,7 @@
     "_enabled": true,
     "__prefab": null,
     "ndButtonStartGame": {
-      "__id__": 32
+      "__id__": 30
     },
     "ndBar": {
       "__id__": 22
@@ -1147,7 +1214,7 @@
       "__id__": 12
     },
     "ndTips": {
-      "__id__": 45
+      "__id__": 50
     },
     "_id": "14wxL4i65Ed7ofSVRYrEce"
   },
@@ -1163,7 +1230,7 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 51
+        "__id__": 56
       }
     ],
     "_prefab": null,
@@ -1202,7 +1269,7 @@
     "_objFlags": 0,
     "__editorExtras__": {},
     "node": {
-      "__id__": 50
+      "__id__": 55
     },
     "_enabled": true,
     "__prefab": null,
@@ -1223,35 +1290,35 @@
         "__id__": 22
       },
       {
-        "__id__": 32
+        "__id__": 30
       }
     ]
   },
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 54
-    },
-    "shadows": {
-      "__id__": 55
-    },
-    "_skybox": {
-      "__id__": 56
-    },
-    "fog": {
-      "__id__": 57
-    },
-    "octree": {
-      "__id__": 58
-    },
-    "skin": {
       "__id__": 59
     },
-    "lightProbeInfo": {
+    "shadows": {
       "__id__": 60
     },
-    "postSettings": {
+    "_skybox": {
       "__id__": 61
+    },
+    "fog": {
+      "__id__": 62
+    },
+    "octree": {
+      "__id__": 63
+    },
+    "skin": {
+      "__id__": 64
+    },
+    "lightProbeInfo": {
+      "__id__": 65
+    },
+    "postSettings": {
+      "__id__": 66
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false

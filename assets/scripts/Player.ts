@@ -104,11 +104,14 @@ export class Player extends Component {
         this._playerId = GameContext.selectedPlayerId;
         // 加载攻击范围
         switch(this._playerId) {
-            case 0:
+            case CharData.Player1.playerId:
                 this._attack1Offset = CharData.Player1.atk1Offset;
                 break;
-            case 1:
+            case CharData.Player2.playerId:
                 this._attack1Offset = CharData.Player2.atk1Offset;
+                break;
+            case CharData.Player4.playerId:
+                this._attack1Offset = CharData.Player4.atk1Offset;
                 break;
             default:
                 this._attack1Offset = CharData.Player1.atk1Offset;
@@ -245,6 +248,13 @@ export class Player extends Component {
             case CharData.Player3.playerId:
                 UseSkill.shootArrow(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                 break;
+            case CharData.Player4.playerId:
+                UseSkill.shootFireBall(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
+                break;
+            case CharData.Player5.playerId:
+                this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
+                    Util.checkCollider(this.attack1Collider, true);
+                break;
             default:
                 this.callback = this.scheduleOnce(() => {
                     this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
@@ -270,6 +280,12 @@ export class Player extends Component {
         this.display.armatureName = 'Attack2';
         this.display.playAnimation('Attack2', 1);
         
+        if (this._playerId === CharData.Player4.playerId) {
+            this.callback = this.scheduleOnce(() => {
+                this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
+                Util.checkCollider(this.attack1Collider, true);
+            }, 0.25)
+        }
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
             switch(this._playerId) {
@@ -281,6 +297,9 @@ export class Player extends Component {
                     break;
                 case CharData.Player3.playerId:
                     UseSkill.shootElectorArrow(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
+                    break;
+                case CharData.Player4.playerId:
+                    Util.checkCollider(this.attack1Collider, false);
                     break;
                 default:
                     break;
@@ -294,6 +313,15 @@ export class Player extends Component {
     playSkill1() {
         this.display.armatureName = 'Attack3';
         this.display.playAnimation('Attack3', 1);
+        switch(this._playerId) {
+            case CharData.Player3.playerId:
+                UseSkill.shootThunderSplash(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
+                break;
+            case CharData.Player4.playerId:
+                this.cure(5)
+            default:
+                break;
+        }
 
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
@@ -303,6 +331,11 @@ export class Player extends Component {
                     break;
                 case CharData.Player2.playerId:
                     UseSkill.shootHole(this.ndSkillStart.worldPosition);
+                    break;
+                case CharData.Player3.playerId:
+                    // UseSkill.shootThunderSplash(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
+                    break;
+                default:
                     break;
             }
             this.playerStatus = Constant.CharStatus.IDLE;
@@ -427,6 +460,16 @@ export class Player extends Component {
             this.hp = 0;
             this._onEvent && this._onEvent.apply(this._target, [Player.Event.DEATH, 0]);
         }   
+    }
+
+    // 恢复HP
+    cure (cureValue: number) {
+        this.hp += cureValue;
+        Util.showText( `${cureValue}`, '#7FFF00' ,this.node.worldPosition, GameContext.ndTextParent);
+        if (this.hp > this.maxHp) {
+            this.hp = this.maxHp;
+        }
+        this._onEvent && this._onEvent.apply(this._target, [Player.Event.HURT, cureValue]);
     }
 
 }
