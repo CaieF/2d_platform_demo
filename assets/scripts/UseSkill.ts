@@ -89,10 +89,10 @@ export class UseSkill{
 
   // 发送火焰球
   static shootFireBall(position: Vec3, scaleX: number) {
-    console.log("shootFireBall", position);
+    // console.log("shootFireBall", position);
     
     const ndFireBall = Globals.getNode(Constant.PrefabUrl.FIRE_BALL, GameContext.ndWeaponParent);
-    console.log("ndFireBall", ndFireBall);
+    // console.log("ndFireBall", ndFireBall);
     
     ndFireBall.worldPosition = position;
     ndFireBall.scale = (new Vec3(scaleX * 4, 4, 0));

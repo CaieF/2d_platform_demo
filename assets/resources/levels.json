@@ -1,0 +1,17 @@
+[
+  {
+      "level": 1,
+      "map": "map/map1",
+      "enemies": ["Skeleton"]
+  },
+  {
+      "level": 2,
+      "map": "map/map3",
+      "enemies": []
+  },
+  {
+      "level": 3,
+      "map": "map/map3",
+      "enemies": []
+  }
+]

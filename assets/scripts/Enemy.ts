@@ -20,7 +20,7 @@ export class Enemy extends Component {
     private attackCollider: Collider2D = null!; // 碰撞器
     private HitCollider: Collider2D = null!; // 受击范围
     private randomMoveTimer: number = 0; // 随机移动计时器
-    private randomMoveTime: number = 0.5; // 随机移动时间
+    private randomMoveTime: number = 0.2; // 随机移动时间
     speed: number = 10;
     hp:number = 100;
     chaseDistance:number = 200; // 追击距离
@@ -105,7 +105,7 @@ export class Enemy extends Component {
             this.rb = this.getComponent(RigidBody2D);
         
             let lv = this.rb!.linearVelocity;
-            const playerPosition = this.getPlayerPosition();
+            const playerPosition = Util.getPlayerPosition();
             const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
 
             if (this.enemyStatus === Constant.CharStatus.IDLE) {
@@ -240,7 +240,7 @@ export class Enemy extends Component {
             
                 if (this.hp <= 0) {
                     Globals.putNode(this.node);
-                    console.log('死亡');
+                    // console.log('死亡');
                 }
             
             display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
@@ -291,10 +291,6 @@ export class Enemy extends Component {
         display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
     }
 
-    // 获取角色位置
-    getPlayerPosition() {
-        return GameContext.ndPlayer.worldPosition;
-    }
 
     // 受伤
     hurt (damage: number) {

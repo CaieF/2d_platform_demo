@@ -1,4 +1,4 @@
-import { _decorator, clamp, Component, KeyCode, Node, tween, UIOpacity, Vec3 } from 'cc';
+import { _decorator, clamp, Component, KeyCode, Label, Node, tween, UIOpacity, Vec3 } from 'cc';
 import { NormalButton } from './NormalButton';
 import { Constant } from './Constant';
 import { AxInput } from './AxInput';
@@ -11,10 +11,9 @@ export class CharPanel extends Component {
     @property(Node) ndBtnLeft: Node;
     @property(Node) ndBtnRight: Node;
     @property(Node) ndChars: Node;
-
+    @property(Number) MoveDistance: number;
     private _currIndex: number = 0; // 当前选择索引
-
-
+    private _opacity: number = 0;
     public get currIndex(): number {
         return this._currIndex;
     }
@@ -44,7 +43,13 @@ export class CharPanel extends Component {
             this.updateCharItemState();
         })
 
-        this.gotoIndex(GameContext.selectedPlayerId);
+        if (GameContext.GameScene === Constant.GameScene.Start) {
+            this._opacity = 80;
+            this.gotoIndex(GameContext.selectedPlayerId);
+        } else if (GameContext.GameScene === Constant.GameScene.Prepare) {
+            this._opacity = 0;
+            this.gotoIndex(0);
+        }
         this.updateCharItemState();
     }
     start() {
@@ -64,9 +69,9 @@ export class CharPanel extends Component {
             const child = this.ndChars.children[i];
             child.getPosition(pos);
             if (i < index) {
-                pos.x = -160 * (index - i);
+                pos.x = -this.MoveDistance * (index - i);
             } else if (i > index) {
-                pos.x = 160 * (i - index);
+                pos.x = this.MoveDistance * (i - index);
             } else {
                 pos.x = 0;
             }
@@ -78,7 +83,7 @@ export class CharPanel extends Component {
 
     updateCharItemState(){
         for (let i = 0; i < this.ndChars.children.length; i++) {
-            this.ndChars.children[i].getComponent(UIOpacity).opacity = i === this._currIndex ? 255 : 80;
+            this.ndChars.children[i].getComponent(UIOpacity).opacity = i === this._currIndex ? 255 : this._opacity;
         }
 
         this.ndBtnLeft.active = this._currIndex > 0;
@@ -105,7 +110,7 @@ export class CharPanel extends Component {
             const pos = child.getPosition();
             actions.push(new Promise((resolve) => {
                 tween(child)
-                .to(0.3, { position: pos.add3f(isNext?-160:160, 0, 0) }, { easing: 'expoOut' })
+                .to(0.3, { position: pos.add3f(isNext?-this.MoveDistance:this.MoveDistance, 0, 0) }, { easing: 'expoOut' })
                 .call(() => {
                     resolve(0);
                 })

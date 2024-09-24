@@ -1,4 +1,16 @@
 export class Constant {
+  // 游戏状态
+  static readonly GameStatus = {
+    RUNNING: 0, // 运行
+    PAUSE: 1, // 暂停
+  }
+
+  // 游戏场景
+  static readonly GameScene = {
+    Start: 'Start', // 开始场景
+    Prepare: 'Prepare', // 准备场景
+    Game: 'Game', // 游戏场景
+  }
   
   static readonly ColliderGroup = {
     DEFAULT: 1 << 0,
@@ -63,9 +75,5 @@ export class Constant {
     ENEMY_ATTACK1:11,
   }
 
-  // 游戏状态
-  static readonly GameStatus = {
-    RUNNING: 0, // 运行
-    PAUSE: 1, // 暂停
-  }
+  
 }

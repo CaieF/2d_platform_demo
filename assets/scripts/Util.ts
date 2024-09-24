@@ -1,13 +1,17 @@
-import { BoxCollider2D, Collider2D, director, EPhysics2DDrawFlags, ERigidBody2DType, Label, math, Node, PhysicsSystem2D, randomRangeInt, RigidBody2D, Size, TiledLayer, TiledMap, tween, UITransform, v3, Vec2, Vec3 } from "cc";
+import { BoxCollider2D, Collider2D, director, EPhysics2DDrawFlags, ERigidBody2DType, Label, math, Node, NodePool, PhysicsSystem2D, randomRangeInt, RigidBody2D, Size, TiledLayer, TiledMap, tween, UITransform, v3, Vec2, Vec3 } from "cc";
 import { Constant } from "./Constant";
 import { Globals } from "./Globals";
 import { GameContext } from "./GameContext";
+import { CharData } from "./CharData";
+import { NormalButton } from "./NormalButton";
+import { SoundBar } from "./SoundBar";
 
 export class Util {
   
   // 给墙体添加碰撞组件
   static setWall(Map: TiledMap) {
-    PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
+    // Map.getComponent(UITransform).setAnchorPoint(0,0); // 设置锚点
+    // PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
     
     // 获取地图墙体
     let tiledSize:Size = Map.getTileSize(); // 得到每一小块的大小
@@ -105,4 +109,45 @@ export class Util {
   //     rigid.applyForceToCenter(force, true);
   //   }
   // }
+
+  // 获取范围的敌人
+  static getNearbyEnemies(node: Node, Range: number): Node[] {
+    const enemies = GameContext.ndEnemyParents.children; // 获取所有敌人
+    return enemies.filter((enemy) => {
+        const distance = Vec3.distance(node.worldPosition, enemy.worldPosition); // 计算距离
+        return distance < Range; // 检查是否在吸引力范围内
+    });
+  }
+
+  // 获取玩家位置
+  static getPlayerPosition() {
+    return GameContext.ndPlayer.worldPosition;
+  }
+
+
+  // 随机移动
+  static rangeMove(deltaTime: number, randomMoveTimer: number, randomMoveTime: number, lv: Vec2) {
+    randomMoveTimer += deltaTime;
+    if (randomMoveTimer > randomMoveTime) {
+      randomMoveTimer = 0;
+      lv.x = (Math.random() * 2 - 1) / 10;
+    }
+    // return lv, randomMoveTimer;
+  }
+
+  // 加载角色头像
+  static loadPlayerAvatar(ndPlayerMessage: Node) {
+    const defaultPlayerId = CharData.Player1.playerId; // 默认角色ID
+    const selectedPlayerId = GameContext.selectedPlayerId;
+    // 获取角色配置
+    const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
+    const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
+    // 角色头像
+    const playerAvatarNode = Globals.getNode(playerAvatarPrefabUrl, ndPlayerMessage);
+    if (playerAvatarNode) {
+        playerAvatarNode.setPosition(-30, 0);
+    }
+  }
+
+  
 }

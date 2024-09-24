@@ -1,4 +1,4 @@
-import { Asset, error, JsonAsset, Prefab, resources, SpriteFrame, TextAsset } from "cc";
+import { Asset, error, JsonAsset, Prefab, resources, SpriteFrame, TextAsset, TiledMap, TiledMapAsset } from "cc";
 
 export class ResUtil {
   static loadRes (url: string, callback: Function) {
@@ -43,6 +43,18 @@ export class ResUtil {
           reject();
         } else {
           resolve(res as TextAsset)
+        }
+      })
+    });
+  }
+
+  static loadTiledMap(url: string): Promise<TiledMapAsset> {
+    return new Promise((resolve, reject) => {
+      this.loadRes(url, (res: any, err: Error) => {
+        if (err) {
+          reject();
+        } else {
+          resolve(res as TiledMapAsset)
         }
       })
     });

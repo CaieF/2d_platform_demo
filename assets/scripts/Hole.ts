@@ -75,19 +75,11 @@ export class Hole extends Component {
         }
     }
 
-    // 获取吸引力范围的敌人
-    private getNearbyEnemies(): Node[] {
-        const enemies = GameContext.ndEnemyParents.children; // 获取所有敌人
-        return enemies.filter((enemy) => {
-            const distance = Vec3.distance(this.node.worldPosition, enemy.worldPosition); // 计算距离
-            return distance < this.attractionRange; // 检查是否在吸引力范围内
-        });
-    }
 
     // 获取被吸引的敌人的碰撞体
     private getNearbyEnemyColliders(): Collider2D[] {
         const nearbyEnemyColliders = [];
-        const nearbyEnemies = this.getNearbyEnemies(); // 获取吸引力范围内的敌人
+        const nearbyEnemies = Util.getNearbyEnemies(this.node, this.attractionRange); // 获取吸引力范围内的敌人
         for (let enemy of nearbyEnemies) {
             const colliders = enemy.getComponents(Collider2D)// 获取敌人的碰撞体
             for (let collider of colliders) {

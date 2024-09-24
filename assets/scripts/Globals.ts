@@ -1,7 +1,9 @@
-import { _decorator, Component, director, Node, Prefab, SpriteFrame, warn } from 'cc';
+import { _decorator, AudioSource, Component, director, Game, Node, Prefab, SpriteFrame, warn } from 'cc';
 import { PoolManager } from './PoolManager';
 import { Constant } from './Constant';
 import { ResUtil } from './ResUtil';
+import { GameContext } from './GameContext';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Globas')
@@ -11,6 +13,9 @@ export class Globals extends Component {
 
     protected onLoad(): void {
         director.addPersistRootNode(this.node);
+        // GameContext.AudioSource = this.node.getComponent(AudioSource);
+        console.log(AudioSource);
+        
     }
 
     start() {
@@ -32,13 +37,17 @@ export class Globals extends Component {
             promise.push(p);
         });
 
-        // promise[promise.length] = ResUtil.loadSpriteFrameDir('skills/').then((frames: SpriteFrame[]) => {
-        //     for (let i = 0; i < frames.length; i++) {
-        //         const sf = frames[i];
-        //         this.skillSpriteFrames[sf.name] = sf;
-        //     }
-        // });
-
+        // 加载关卡数据
+        ResUtil.loadJson('levels').then((data) => {
+            GameContext.levels = data.json;
+            // console.log('加载关卡数据成功！');
+            // this.loadLevel(1);
+        }).catch((err) => {
+            console.error('加载关卡数据失败！');
+        })
+        
+        AudioManager.Instance.init();
+        AudioManager.Instance.playMusic('sounds/Load', GameContext.GameSound);
         return Promise.all(promise);
     }
 

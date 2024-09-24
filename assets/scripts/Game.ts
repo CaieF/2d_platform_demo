@@ -1,4 +1,4 @@
-import { _decorator, Component, director, Label, Node, randomRangeInt, Slider, TiledMap } from 'cc';
+import { _decorator, Component, director, Label, Node, randomRangeInt, Slider, TiledMap, TiledMapAsset, UITransform } from 'cc';
 import { Util } from './Util';
 import { GameContext } from './GameContext';
 import { Player } from './Player';
@@ -10,6 +10,10 @@ import { SkillButton } from './SkillButton';
 import { CharData } from './CharData';
 import { NormalButton } from './NormalButton';
 import { SoundBar } from './SoundBar';
+import { ButtonEvent } from './ButtonEvent';
+import { LevelManager } from './LevelManager';
+import { ResUtil } from './ResUtil';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Game')
@@ -17,12 +21,15 @@ export class Game extends Component {
     @property(Node) ndPlayerParents: Node;
     @property(Node) ndEnemyParents: Node;
     @property(Node) ndTextParent: Node;
+    @property(Node) ndLevelManager: Node;
     @property(TiledMap) Map: TiledMap;
     @property(Node) ndPlayerMessage: Node;
     @property(Node) ndWeaponParent: Node;
     @property(Node) ndWeaponParent0: Node;
     @property(Node) ndBtnSettingButton: Node; // 设置按钮
     @property(Node) ndSettingPanel: Node; // 设置面板
+
+    map: TiledMap;
 
     private _ndLifeBar: Node;
     private _ndExpBar: Node;
@@ -32,18 +39,12 @@ export class Game extends Component {
     private _sk1Button: SkillButton;
     private _sk2Button: SkillButton;
     private _sk3Button: SkillButton;
+    protected async onLoad() {
+        // AudioManager.Instance.stopMusic();
+        
 
-    private _ndButton: Node;
-    private _ndSoundBar: Node; // 音量条
-    private _ndCancelButton: Node; // 取消按钮
-    private _ndOKButton: Node; // 确定按钮
-    private _ndHomeButton: Node; // 返回按钮
-    private _ndReloadButton: Node; // 重新开始按钮
-    private _ndNoSoundButton: Node; // 关闭音效按钮
-    private _ndMaxSoundButton: Node; // 开启音效按钮
-
-    protected onLoad() {
         // 相关父节点赋值
+        // this.node.getChildByName('Map').TiledMap
         GameContext.ndPlayerParents = this.ndPlayerParents;
         GameContext.ndTextParent = this.ndTextParent; 
         this._loadPlayer();
@@ -52,25 +53,32 @@ export class Game extends Component {
         GameContext.ndWeaponParent0 = this.ndWeaponParent0;
         GameContext.GameStatus = Constant.GameStatus.RUNNING;
 
-        // 生命条 经验条
+        
+
+        // 生命条 经验条 等级
         this._ndLifeBar = this.ndPlayerMessage.getChildByName('LifeBar');
         this._ndExpBar = this.ndPlayerMessage.getChildByName('ExpBar');
         this._ndLevel = this.ndPlayerMessage.getChildByName('Level');
+        await this.loadLevel(GameContext.selectedLevelId) // 加载地图
+        // await this.loadLevel(2);
+        this.map = this.ndLevelManager.getComponent(TiledMap);
         
-
-
-        // 相关按钮
-        this._ndButton = this.ndSettingPanel.getChildByName('Button');
-        this._ndSoundBar = this.ndSettingPanel.getChildByName('SoundBar'); // 音量条
-        this._ndOKButton = this._ndButton.getChildByName('OkButton'); // 确定按钮
-        this._ndCancelButton = this._ndButton.getChildByName('CancelButton'); // 取消按钮
-        this._ndHomeButton = this._ndButton.getChildByName('HomeButton'); // 返回按钮
-        this._ndReloadButton = this._ndButton.getChildByName('ReloadingButton'); // 重新开始按钮
-        this._ndNoSoundButton = this._ndButton.getChildByName('NoSoundButton'); // 关闭音效按钮
-        this._ndMaxSoundButton = this._ndButton.getChildByName('MaxSoundButton'); // 开启音效按钮
+        // console.log('this.map:',this.map);
+        
+        if (this.map){
+            this.ndLevelManager.getComponent(UITransform).setAnchorPoint(0,0)
+            // console.log('this.map.tmxAsset:',this.map.tmxAsset);
+            
+            Util.setWall(this.map);
+        } else {
+            // console.log('this.map.tmxAsset no');     
+        }
+        // GameContext.AudioSource.clip = 
     }
 
     protected onEnable(): void {
+        GameContext.GameScene = Constant.GameScene.Game;
+        AudioManager.Instance.playMusic('sounds/Game', GameContext.GameSound);
         this._rebindSkillButtons();
         // 设置按钮键盘事件
         this.ndBtnSettingButton.getComponent(NormalButton).onKeyEsc(() => {
@@ -78,44 +86,8 @@ export class Game extends Component {
             Util.applyPause();
             this.ndSettingPanel.active = !this.ndSettingPanel.active;
         })
-        // 设置按钮点击事件
-        this.ndBtnSettingButton.getComponent(NormalButton).onClick(() => {
-            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
-            Util.applyPause();
-            this.ndSettingPanel.active = !this.ndSettingPanel.active;
-        })
-        // 确定按钮点击事件
-        this._ndOKButton.getComponent(NormalButton).onClick(() => {
-            Util.applyResume();
-            this.ndSettingPanel.active = !this.ndSettingPanel.active;
-        })
-        // 取消按钮点击事件
-        this._ndCancelButton.getComponent(NormalButton).onClick(() => {
-            Util.applyResume();
-            this.ndSettingPanel.active = !this.ndSettingPanel.active;
-        })
-        // 返回按钮点击事件
-        this._ndHomeButton.getComponent(NormalButton).onClick(() => {
-            Util.applyResume();
-            director.loadScene('Start');
-        })
-        // 重新开始按钮点击事件
-        this._ndReloadButton.getComponent(NormalButton).onClick(() => {
-            Util.applyResume();
-            director.loadScene('Game');
-        })
-        // 点击关闭音效按钮事件
-        this._ndNoSoundButton.getComponent(NormalButton).onClick(() => {
-            this._ndNoSoundButton.active = false;
-            this._ndMaxSoundButton.active = true;
-            this._ndSoundBar.getComponent(SoundBar).updateVolumeLabel(1);
-        })
-        // 点击开启音效按钮事件
-        this._ndMaxSoundButton.getComponent(NormalButton).onClick(() => {
-            this._ndNoSoundButton.active = true;
-            this._ndMaxSoundButton.active = false;
-            this._ndSoundBar.getComponent(SoundBar).updateVolumeLabel(0);
-        })
+        
+        ButtonEvent.setButtonEvent(this.ndBtnSettingButton, 'Setting', this.ndSettingPanel); // 设置按钮点击事件
 
         // 生命条
         const lifeBar = this._ndLifeBar.getComponent(ProgressBar);
@@ -154,9 +126,7 @@ export class Game extends Component {
         });
     }
     start() {
-        if (this.Map){
-            Util.setWall(this.Map);
-        }
+        
 
         this.schedule(this._spawnEnemy, 2);
     }
@@ -198,7 +168,7 @@ export class Game extends Component {
         const selectedPlayerId = GameContext.selectedPlayerId;
 
         // 获取角色配置
-        const playerConfigData = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
+        const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
 
         const playerPrefabUrl = playerConfigData.prefabUrl;
         const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
@@ -214,11 +184,7 @@ export class Game extends Component {
             GameContext.player = playerNode.getComponent(Player);
             GameContext.player.setValue(hp, hp, speed, jump_speed); // 设置属性
         }
-        // 角色头像
-        const playerAvatarNode = Globals.getNode(playerAvatarPrefabUrl, this.ndPlayerMessage);
-        if (playerAvatarNode) {
-            playerAvatarNode.setPosition(-30, 0);
-        }
+        Util.loadPlayerAvatar(this.ndPlayerMessage)
         // 技能栏
         const skillBarNode = Globals.getNode(SkillBarPrefabUrl, this.ndPlayerMessage);
         
@@ -287,5 +253,37 @@ export class Game extends Component {
         this._sk3Button.onKeyL(() => {
             GameContext.player.playerStatus = Constant.CharStatus.DODGE;
         });
+    }
+
+    loadLevel(levelIndex: number): Promise<void> {
+        return new Promise(( resolve, reject ) => {
+        // 确保索引有效
+        if (levelIndex < 0 || levelIndex >= GameContext.levels.length) {
+            console.error('无效的关卡索引');
+        }
+        // console.log('正在加载关卡：' + levelIndex);
+        
+        const selectedLevel = GameContext.levels[levelIndex];
+        // console.log('selectedLevel:map:', selectedLevel.map);
+        
+        ResUtil.loadTiledMap(selectedLevel.map).then((map) => {
+            this.instantiateMap(map);
+            resolve();
+        }).catch((err) => {
+            console.error('关卡加载失败！');
+            reject(err);
+        });
+        })
+        
+    }
+
+    instantiateMap(map: TiledMapAsset) {
+        // console.log('地图对象:',map);
+        const tiledMapComponent = this.ndLevelManager.getComponent(TiledMap)
+        this.map = tiledMapComponent;
+        tiledMapComponent.tmxAsset = map;
+        // console.log(this.node);
+        // console.log('关卡加载成功！');
+        
     }
 }

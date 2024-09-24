@@ -75,6 +75,7 @@ export class NormalButton extends Component {
                 break;
             case KeyCode.ESCAPE:
                 this._EscCb && this.node.setScale(0.98, 0.98);
+                break;
             default:
                 break;
         }
@@ -94,6 +95,7 @@ export class NormalButton extends Component {
             case KeyCode.SPACE:
                 this.node.setScale(1, 1);
                 this._SpaceCb && this._SpaceCb.apply(this._KeyTarget);
+                break;
             case KeyCode.ESCAPE:
                 this.node.setScale(1, 1);
                 this._EscCb && this._EscCb.apply(this._KeyTarget);

@@ -170,6 +170,8 @@ export class Player extends Component {
 
     
     update(deltaTime: number) {
+        const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
+        this.node.setPosition(x, this.node.position.y, 0);
         if (this.playerStatus == Constant.CharStatus.TAKEDAMAGE) return;
         if (this.playerStatus == Constant.CharStatus.ATTACK) return;
         if (this.playerStatus == Constant.CharStatus.SKILL0) return;
@@ -179,18 +181,19 @@ export class Player extends Component {
         let lv = this.rb!.linearVelocity;
         let gravity = PhysicsSystem2D.instance.gravity;
 
+        // 随机移动
         if (this.playerStatus == Constant.CharStatus.IDLE || this.playerStatus == Constant.CharStatus.ATTACK) {
             this.randomMoveTimer += deltaTime;
-                if (this.randomMoveTimer > this.randomMoveTime) {
-                    this.randomMoveTimer = 0;
-                    lv.x = (Math.random() * 2 - 1) / 10;
-                }
+            if (this.randomMoveTimer > this.randomMoveTime) {
+                this.randomMoveTimer = 0;
+                lv.x = (Math.random() * 2 - 1) / 10 ;
+            }
         }
 
+        // 翻滚
         if (this.playerStatus == Constant.CharStatus.DODGE) {
             if (this.ndAni.scale.x < 0) lv.x -= this.speed * deltaTime;
             else lv.x += this.speed * deltaTime;
-            // lv.x += this.speed * deltaTime;
         }
 
         // 按下按钮
@@ -203,10 +206,10 @@ export class Player extends Component {
         // 水平移动
         if (this.playerStatus == Constant.CharStatus.RUN || this.playerStatus == Constant.CharStatus.JUMP) {
             if (axInput.is_action_pressed(KeyCode.KEY_A)){
-                lv.x -= this.speed * deltaTime;
+                lv.x = -this.speed / 2;
                 this.ndAni.setScale(-1, 1)
             } else if (axInput.is_action_pressed(KeyCode.KEY_D)){
-                lv.x += this.speed * deltaTime;
+                lv.x = this.speed / 2;
                 this.ndAni.setScale(1, 1)
             } 
         }
@@ -455,7 +458,7 @@ export class Player extends Component {
             if ( this.playerStatus !== Constant.CharStatus.ATTACK && this.playerStatus !== Constant.CharStatus.TAKEDAMAGE && this.playerStatus !== Constant.CharStatus.SKILL0 && this.playerStatus !== Constant.CharStatus.SKILL1 && this.playerStatus !== Constant.CharStatus.SKILL2) {
                 this.playerStatus = Constant.CharStatus.TAKEDAMAGE;
             } 
-            console.log(`HP: ${this.hp}, Status: ${this.playerStatus}`);
+            // console.log(`HP: ${this.hp}, Status: ${this.playerStatus}`);
         } else {
             this.hp = 0;
             this._onEvent && this._onEvent.apply(this._target, [Player.Event.DEATH, 0]);

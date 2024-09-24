@@ -4,6 +4,8 @@ import { ProgressBar } from './ProgressBar';
 import { NormalButton } from './NormalButton';
 import { CharPanel } from './CharPanel';
 import { GameContext } from './GameContext';
+import { Util } from './Util';
+import { Constant } from './Constant';
 const { ccclass, property } = _decorator;
 
 @ccclass('Start')
@@ -12,7 +14,12 @@ export class Start extends Component {
     @property(Node) ndBar: Node;
     @property(Node) ndCharPanel: Node;
     @property(Label) ndTips: Label;
+    // @property(Node) ndPlayerMessage: Node; // 角色相关信息
     // private isFirstLoad: boolean = true; // 是否是第一次加载
+    protected onEnable(): void {
+        GameContext.GameScene = Constant.GameScene.Start;
+        
+    }
 
     start() {
         // console.log(this.isFirstLoad);
@@ -58,6 +65,7 @@ export class Start extends Component {
             })
             this.ndButtonStartGame.getComponent(NormalButton).onKeySpace(() => {
                 this.startGame();
+                // this.choiceLevel();
             })
         }
         
@@ -67,9 +75,11 @@ export class Start extends Component {
         
     }
 
+
     private startGame () {
         GameContext.selectedPlayerId = this.ndCharPanel.getComponent(CharPanel).currIndex;
-        director.loadScene('Game');
+        director.loadScene('Prepare');
+        // director.loadScene('Game')
     }
 }
 
