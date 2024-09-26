@@ -28,6 +28,7 @@ export class Game extends Component {
     @property(Node) ndWeaponParent0: Node;
     @property(Node) ndBtnSettingButton: Node; // 设置按钮
     @property(Node) ndSettingPanel: Node; // 设置面板
+    @property(Node) ndDeathPanel: Node; // 死亡面板
 
     map: TiledMap;
 
@@ -53,17 +54,12 @@ export class Game extends Component {
         GameContext.ndWeaponParent0 = this.ndWeaponParent0;
         GameContext.GameStatus = Constant.GameStatus.RUNNING;
 
-        
-
         // 生命条 经验条 等级
         this._ndLifeBar = this.ndPlayerMessage.getChildByName('LifeBar');
         this._ndExpBar = this.ndPlayerMessage.getChildByName('ExpBar');
         this._ndLevel = this.ndPlayerMessage.getChildByName('Level');
         await this.loadLevel(GameContext.selectedLevelId) // 加载地图
-        // await this.loadLevel(2);
         this.map = this.ndLevelManager.getComponent(TiledMap);
-        
-        // console.log('this.map:',this.map);
         
         if (this.map){
             this.ndLevelManager.getComponent(UITransform).setAnchorPoint(0,0)
@@ -71,9 +67,8 @@ export class Game extends Component {
             
             Util.setWall(this.map);
         } else {
-            // console.log('this.map.tmxAsset no');     
+            console.log('this.map.tmxAsset no');     
         }
-        // GameContext.AudioSource.clip = 
     }
 
     protected onEnable(): void {
@@ -110,6 +105,9 @@ export class Game extends Component {
                 case Player.Event.DEATH:
                     lifeBar.setProgress(0);
                     lifeBar.setLabel(0, GameContext.player.maxHp);
+                    this.ndDeathPanel.active = true;
+                    AudioManager.Instance.playMusic('sounds/Requiem', GameContext.GameSound);
+                    Util.applyPause();
                     break;
                 case Player.Event.ADD_EXP:
                     expBar.setProgress(GameContext.player.exp / GameContext.player.maxExp);
@@ -126,8 +124,6 @@ export class Game extends Component {
         });
     }
     start() {
-        
-
         this.schedule(this._spawnEnemy, 2);
     }
 
@@ -278,12 +274,8 @@ export class Game extends Component {
     }
 
     instantiateMap(map: TiledMapAsset) {
-        // console.log('地图对象:',map);
         const tiledMapComponent = this.ndLevelManager.getComponent(TiledMap)
         this.map = tiledMapComponent;
         tiledMapComponent.tmxAsset = map;
-        // console.log(this.node);
-        // console.log('关卡加载成功！');
-        
     }
 }

@@ -8,8 +8,8 @@ const { ccclass, property } = _decorator;
 export class SettingPanel extends Component {
     // @property(Node) ndButton: Node;
     @property(Node) ndSoundBar: Node; // 音量条
-    @property(Node) ndCancelButton: Node; // 取消按钮
-    @property(Node) ndOKButton: Node; // 确定按钮
+    @property(Node) ndCancelButton: Node=null; // 取消按钮
+    @property(Node) ndOKButton: Node=null; // 确定按钮
     @property(Node) ndHomeButton: Node; // 返回按钮
     @property(Node) ndReloadButton: Node; // 重新开始按钮
     @property(Node) ndNoSoundButton: Node; // 关闭音效按钮

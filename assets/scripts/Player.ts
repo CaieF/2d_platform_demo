@@ -94,6 +94,9 @@ export class Player extends Component {
             case Constant.CharStatus.DODGE:
                 this.playDodge();
                 break;
+            case Constant.CharStatus.DEATH:
+                this.playDeath();
+                break;
             default:
                 break;
             }
@@ -394,6 +397,18 @@ export class Player extends Component {
         this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
     }
 
+    // 死亡状态
+    playDeath() {
+        this.display.armatureName = 'Death';
+        this.display.playAnimation('Death', 1);
+
+        const onComplete = () => {
+            this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
+            this._onEvent && this._onEvent.apply(this._target, [Player.Event.DEATH, 0]);
+        }
+        this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
+    }
+
     updateColliderPosition =(collider: Collider2D, offset: number) => {
         collider.offset.x = this.ndAni.scale.x * offset;
         collider.node.worldPosition = this.node.worldPosition;
@@ -405,7 +420,7 @@ export class Player extends Component {
             switch(other.tag) {
                 case Constant.ColliderTag.ENEMY_ATTACK1:
                     if (this.playerStatus !== Constant.CharStatus.DEATH && this.playerStatus !== Constant.CharStatus.DODGE) {
-                        this.hurt(1);
+                        this.hurt(100);
                         // Util.moveNode(this.node, 1, 0.0001);
                     }
                     break;
@@ -461,7 +476,7 @@ export class Player extends Component {
             // console.log(`HP: ${this.hp}, Status: ${this.playerStatus}`);
         } else {
             this.hp = 0;
-            this._onEvent && this._onEvent.apply(this._target, [Player.Event.DEATH, 0]);
+            this.playerStatus = Constant.CharStatus.DEATH;
         }   
     }
 

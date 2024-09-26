@@ -9,11 +9,14 @@ import { AudioManager } from "./AudioManager";
 export class ButtonEvent {
   // 设置按钮点击事件
   static setButtonEvent(ndButton: Node, buttonType: String, ndSettingPanel?: Node, ndSoundBar?: Node) {
+    if (ndButton == null) return;
+
     ndButton.getComponent(NormalButton).onClick(() => {
       switch (buttonType) {
         case "Setting":
           // 设置按钮 
           if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+          // AudioManager.Instance.playMusic('sounds/Requiem', GameContext.GameSound)
           Util.applyPause();
           ndSettingPanel.active = !ndSettingPanel.active;
           break;
@@ -43,6 +46,16 @@ export class ButtonEvent {
           break;
         case 'maxSound':
           ndSoundBar.getComponent(SoundBar).updateVolumeLabel(0);
+          break;
+        case 'Back':
+          // 设置按钮 
+          if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+          if (GameContext.GameScene === Constant.GameScene.Game) {
+            director.loadScene(Constant.GameScene.Prepare)
+            AudioManager.Instance.playMusic('sounds/Load', GameContext.GameSound)
+          } else if (GameContext.GameScene === Constant.GameScene.Prepare) {
+            director.loadScene(Constant.GameScene.Start);
+          }
           break;
         default:
           break;
