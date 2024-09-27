@@ -92,6 +92,7 @@ export class SkillButton extends Component {
 
     onKeyDown(event: EventKeyboard) {
         if (GameContext.GameStatus === Constant.GameStatus.PAUSE) { return; }
+        if (GameContext.player.playerStatus !== Constant.CharStatus.IDLE && GameContext.player.playerStatus !== Constant.CharStatus.RUN &&  GameContext.player.playerStatus !== Constant.CharStatus.JUMP) return;
         if (!this.isAvaliable) { return; }
         switch (event.keyCode) {
             case KeyCode.KEY_U:

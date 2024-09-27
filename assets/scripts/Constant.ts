@@ -3,6 +3,7 @@ export class Constant {
   static readonly GameStatus = {
     RUNNING: 0, // 运行
     PAUSE: 1, // 暂停
+    LOADING: 2, // 加载
   }
 
   // 游戏场景

@@ -7,13 +7,13 @@ const { ccclass, property } = _decorator;
 @ccclass('SettingPanel')
 export class SettingPanel extends Component {
     // @property(Node) ndButton: Node;
-    @property(Node) ndSoundBar: Node; // 音量条
+    @property(Node) ndSoundBar: Node=null; // 音量条
     @property(Node) ndCancelButton: Node=null; // 取消按钮
     @property(Node) ndOKButton: Node=null; // 确定按钮
-    @property(Node) ndHomeButton: Node; // 返回按钮
-    @property(Node) ndReloadButton: Node; // 重新开始按钮
-    @property(Node) ndNoSoundButton: Node; // 关闭音效按钮
-    @property(Node) ndMaxSoundButton: Node; // 开启音效按钮
+    @property(Node) ndHomeButton: Node=null; // 返回按钮
+    @property(Node) ndReloadButton: Node=null; // 重新开始按钮
+    @property(Node) ndNoSoundButton: Node=null; // 关闭音效按钮
+    @property(Node) ndMaxSoundButton: Node=null; // 开启音效按钮
 
     protected onEnable(): void {
         ButtonEvent.setButtonEvent(this.ndOKButton, 'OK', this.node); // 确定按钮点击事件
@@ -23,22 +23,24 @@ export class SettingPanel extends Component {
         ButtonEvent.setButtonEvent(this.ndNoSoundButton, 'noSound',null, this.ndSoundBar); // 关闭音效按钮点击事件
         ButtonEvent.setButtonEvent(this.ndMaxSoundButton, 'maxSound',null, this.ndSoundBar); // 开启音效按钮点击事件
 
-
-        this.ndSoundBar.getComponent(SoundBar).onSoundEvent((event: number) => {
-            switch (event) {
-                case SoundBar.Event.SOUND:
-                    this.ndMaxSoundButton.active = true;
-                    this.ndNoSoundButton.active = false;
-                    break;
-                case SoundBar.Event.NOSOUND:
-                    this.ndMaxSoundButton.active = false;
-                    this.ndNoSoundButton.active = true;
-                    break;
-                default:
-                    break;
-            }
-            
-        })
+        if (this.ndSoundBar) {
+            this.ndSoundBar.getComponent(SoundBar).onSoundEvent((event: number) => {
+                switch (event) {
+                    case SoundBar.Event.SOUND:
+                        this.ndMaxSoundButton.active = true;
+                        this.ndNoSoundButton.active = false;
+                        break;
+                    case SoundBar.Event.NOSOUND:
+                        this.ndMaxSoundButton.active = false;
+                        this.ndNoSoundButton.active = true;
+                        break;
+                    default:
+                        break;
+                }
+                
+            })
+        }
+        
 
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this, true);
         this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this, true);

@@ -121,7 +121,10 @@ export class Util {
 
   // 获取玩家位置
   static getPlayerPosition() {
-    return GameContext.ndPlayer.worldPosition;
+    if (GameContext.ndPlayer) {
+      return GameContext.ndPlayer.worldPosition;
+    }
+    
   }
 
 

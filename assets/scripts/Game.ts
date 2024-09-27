@@ -9,9 +9,7 @@ import { ProgressBar } from './ProgressBar';
 import { SkillButton } from './SkillButton';
 import { CharData } from './CharData';
 import { NormalButton } from './NormalButton';
-import { SoundBar } from './SoundBar';
 import { ButtonEvent } from './ButtonEvent';
-import { LevelManager } from './LevelManager';
 import { ResUtil } from './ResUtil';
 import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
@@ -22,14 +20,14 @@ export class Game extends Component {
     @property(Node) ndEnemyParents: Node;
     @property(Node) ndTextParent: Node;
     @property(Node) ndLevelManager: Node;
-    @property(TiledMap) Map: TiledMap;
+    // @property(TiledMap) Map: TiledMap;
     @property(Node) ndPlayerMessage: Node;
     @property(Node) ndWeaponParent: Node;
     @property(Node) ndWeaponParent0: Node;
     @property(Node) ndBtnSettingButton: Node; // 设置按钮
     @property(Node) ndSettingPanel: Node; // 设置面板
     @property(Node) ndDeathPanel: Node; // 死亡面板
-
+    @property(Node) ndLoadingPanel: Node; // 加载面板
     map: TiledMap;
 
     private _ndLifeBar: Node;
@@ -46,21 +44,24 @@ export class Game extends Component {
 
         // 相关父节点赋值
         // this.node.getChildByName('Map').TiledMap
+        GameContext.GameStatus = Constant.GameStatus.LOADING;
+        this.ndLoadingPanel.active = true;
         GameContext.ndPlayerParents = this.ndPlayerParents;
         GameContext.ndTextParent = this.ndTextParent; 
-        this._loadPlayer();
+        
         GameContext.ndEnemyParents = this.ndEnemyParents;
         GameContext.ndWeaponParent = this.ndWeaponParent;
         GameContext.ndWeaponParent0 = this.ndWeaponParent0;
-        GameContext.GameStatus = Constant.GameStatus.RUNNING;
+        
 
         // 生命条 经验条 等级
         this._ndLifeBar = this.ndPlayerMessage.getChildByName('LifeBar');
         this._ndExpBar = this.ndPlayerMessage.getChildByName('ExpBar');
         this._ndLevel = this.ndPlayerMessage.getChildByName('Level');
-        await this.loadLevel(GameContext.selectedLevelId) // 加载地图
-        this.map = this.ndLevelManager.getComponent(TiledMap);
         
+        this._loadPlayer(); // 加载角色
+        await this.loadLevel(GameContext.selectedLevelId) // 加载地图
+        this.map = this.ndLevelManager.getComponent(TiledMap); // 地图
         if (this.map){
             this.ndLevelManager.getComponent(UITransform).setAnchorPoint(0,0)
             // console.log('this.map.tmxAsset:',this.map.tmxAsset);
@@ -69,9 +70,15 @@ export class Game extends Component {
         } else {
             console.log('this.map.tmxAsset no');     
         }
+        // this.scheduleOnce(() => {
+        //     this.ndLoadingPanel.active = false;
+        // }, 0.5)
+        this.ndLoadingPanel.active = false;
     }
 
-    protected onEnable(): void {
+    protected async onEnable() {
+        
+
         GameContext.GameScene = Constant.GameScene.Game;
         AudioManager.Instance.playMusic('sounds/Game', GameContext.GameSound);
         this._rebindSkillButtons();
@@ -123,7 +130,8 @@ export class Game extends Component {
             }
         });
     }
-    start() {
+    async start() {
+        GameContext.GameStatus = Constant.GameStatus.RUNNING;
         this.schedule(this._spawnEnemy, 2);
     }
 
@@ -277,5 +285,9 @@ export class Game extends Component {
         const tiledMapComponent = this.ndLevelManager.getComponent(TiledMap)
         this.map = tiledMapComponent;
         tiledMapComponent.tmxAsset = map;
+    }
+
+    initGame() {
+
     }
 }
