@@ -24,21 +24,25 @@ export class CharPanel extends Component {
         this.ndBtnRight.getComponent(NormalButton).isActivated = true;
 
         this.ndBtnLeft.getComponent(NormalButton).onClick(() => {
+            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
             this.moveLeft();
             this.updateCharItemState();
         });
 
         this.ndBtnLeft.getComponent(NormalButton).onKeyLeft(() => {
+            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
             this.moveLeft();
             this.updateCharItemState();
         })
 
         this.ndBtnRight.getComponent(NormalButton).onClick(() => {
+            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
             this.moveRight();
             this.updateCharItemState();
         });
 
         this.ndBtnRight.getComponent(NormalButton).onKeyRight(() => {
+            if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
             this.moveRight();
             this.updateCharItemState();
         })

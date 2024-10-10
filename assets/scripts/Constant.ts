@@ -59,11 +59,13 @@ export class Constant {
     SKILL_BAR3: 'SkillBar3', // 角色3技能栏
     SKILL_BAR4: 'SkillBar4', // 角色4技能栏
     SKILL_BAR5: 'SkillBar4', // 角色5技能栏
+    BOSS1: 'Boss1', // boss1
     ARROW: 'Arrow', // 箭矢
     FIRE_BALL: 'FireBall', // 火球
     THUNDER_STRIKE: 'ThunderStrike', // 闪电
     RED_EXPLOSION: 'RedExplosion', // 红色爆炸
-    SKELETON: 'Skeleton' // 骷髅
+    SKELETON: 'Skeleton', // 骷髅
+    SKELETON2: 'Skeleton2', // 骷髅2 
   }
 
   static readonly ColliderTag = {

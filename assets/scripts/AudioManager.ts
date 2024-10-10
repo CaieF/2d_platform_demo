@@ -142,7 +142,7 @@ export class AudioManager extends Component {
 
     public playMusic(name: string, volumeScale: number = 1) {
 
-        if (this.musicVolume === 0) return;
+        // if (this.musicVolume === 0) return;
 
         const musicAudioSource = this.m_musicSource!;
 

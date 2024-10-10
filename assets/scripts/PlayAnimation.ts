@@ -1,5 +1,4 @@
 import { Collider2D, dragonBones } from "cc";
-import { Util } from "./Util";
 import { Constant } from "./Constant";
 
 

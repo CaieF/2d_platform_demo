@@ -1,7 +1,10 @@
-import { _decorator, Component, EventTouch, Node, UITransform, Vec3 } from 'cc';
-import { Util } from './Util';
+import { _decorator, Component, director, EventTouch, Label, Node, UITransform, Vec3 } from 'cc';
 import { ButtonEvent } from './ButtonEvent';
 import { SoundBar } from './SoundBar';
+import { Util } from './Util';
+import { GameContext } from './GameContext';
+import { Constant } from './Constant';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('SettingPanel')
@@ -14,12 +17,27 @@ export class SettingPanel extends Component {
     @property(Node) ndReloadButton: Node=null; // 重新开始按钮
     @property(Node) ndNoSoundButton: Node=null; // 关闭音效按钮
     @property(Node) ndMaxSoundButton: Node=null; // 开启音效按钮
+    @property(Node) ndTimer: Node=null; // 计时器
+    @property(Node) ndNextButton: Node=null; // 下一步按钮
+    Timer: number = 0;
+    SetTimer: number = 30;
+    timerInterval = null; // 定时器
+
+    protected onLoad(): void {
+        this.SetTimer = 30;
+        this.Timer = 0;
+    }
 
     protected onEnable(): void {
+        if (this.node.active === true && this.ndNextButton) {
+            this.ndNextButton.active = GameContext.selectedLevelId < GameContext.levels.length - 1;
+        }
+
+        ButtonEvent.setButtonEvent(this.ndNextButton, 'Next', null, null); // 下一步按钮点击事件
         ButtonEvent.setButtonEvent(this.ndOKButton, 'OK', this.node); // 确定按钮点击事件
         ButtonEvent.setButtonEvent(this.ndCancelButton, 'OK', this.node); // 取消按钮点击事件
-        ButtonEvent.setButtonEvent(this.ndHomeButton, 'Home'); // 返回按钮点击事件
-        ButtonEvent.setButtonEvent(this.ndReloadButton, 'Reload'); // 重新开始按钮点击事件
+        ButtonEvent.setButtonEvent(this.ndHomeButton, 'Home', null, null); // 返回按钮点击事件
+        ButtonEvent.setButtonEvent(this.ndReloadButton, 'Reload', null, null); // 重新开始按钮点击事件
         ButtonEvent.setButtonEvent(this.ndNoSoundButton, 'noSound',null, this.ndSoundBar); // 关闭音效按钮点击事件
         ButtonEvent.setButtonEvent(this.ndMaxSoundButton, 'maxSound',null, this.ndSoundBar); // 开启音效按钮点击事件
 
@@ -48,6 +66,8 @@ export class SettingPanel extends Component {
     }
 
     protected onDisable(): void {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
         this.node.off(Node.EventType.TOUCH_START, this.onTouchStart, this, true);
         this.node.off(Node.EventType.TOUCH_END, this.onTouchEnd, this, true);
         this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this, true);
@@ -59,6 +79,7 @@ export class SettingPanel extends Component {
     update(deltaTime: number) {
         
     }
+
 
     onTouchStart(event: EventTouch) {
         const v2 = event.getUIStartLocation();
@@ -72,6 +93,37 @@ export class SettingPanel extends Component {
     onTouchEnd() {
     }
     onTouchCancel() {
+    }
+
+    public onPlayerDeath() {
+        if (this.ndTimer) {
+            this.SetTimer = 30;
+            this.Timer = 0;
+            this.startTime();
+        }
+    }
+
+    private startTime() {
+        if (this.ndTimer) {
+            const label =  this.ndTimer.getComponent(Label);
+            label.string = this.SetTimer.toString() + 's';
+
+            this.timerInterval = setInterval(() => {
+                this.Timer += 1; // 每秒增加 Timer
+    
+                if (this.SetTimer > 0) {
+                    this.SetTimer -= 1; // 减少 SetTimer
+                    const label = this.ndTimer.getComponent(Label);
+                    label.string = this.SetTimer.toString() + 's';
+                }
+    
+                // 如果时间到了，处理超时逻辑
+                if (this.SetTimer <= 0) {
+                    clearInterval(this.timerInterval);
+                    ButtonEvent.getHome();
+                }
+            }, 1000); // 每秒执行一次
+        }
     }
 }
 

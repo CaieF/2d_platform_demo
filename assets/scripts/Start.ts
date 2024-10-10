@@ -4,8 +4,9 @@ import { ProgressBar } from './ProgressBar';
 import { NormalButton } from './NormalButton';
 import { CharPanel } from './CharPanel';
 import { GameContext } from './GameContext';
-import { Util } from './Util';
 import { Constant } from './Constant';
+import { ButtonEvent } from './ButtonEvent';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Start')
@@ -13,11 +14,16 @@ export class Start extends Component {
     @property(Node) ndButtonStartGame: Node;
     @property(Node) ndBar: Node;
     @property(Node) ndCharPanel: Node;
+    @property(Node) ndListPanel: Node;
+    @property(Node) ndBtnList: Node;
     @property(Label) ndTips: Label;
     // @property(Node) ndPlayerMessage: Node; // 角色相关信息
     // private isFirstLoad: boolean = true; // 是否是第一次加载
     protected onEnable(): void {
+        
         GameContext.GameScene = Constant.GameScene.Start;
+
+        ButtonEvent.setButtonEvent(this.ndBtnList, 'Setting', this.ndListPanel); // 设置按钮点击事件
         
     }
 
@@ -30,8 +36,10 @@ export class Start extends Component {
         
             Globals.init().then(() => {
                 this.scheduleOnce(() => {
+                    // AudioManager.Instance.musicVolume = GameContext.GameSound;
                     this.ndButtonStartGame.active = true;
                     this.ndCharPanel.active = true;
+                    this.ndBtnList.active = true;
                     this.ndBar.active = false;
                     this.ndTips.string = '按下A/D键切换角色，空格键开始游戏';
 
@@ -56,8 +64,10 @@ export class Start extends Component {
                 tween(this.ndBar).repeat(10, ac).start();
             })
         } else {
+            // AudioManager.Instance.musicVolume = GameContext.GameSound;
             this.ndButtonStartGame.active = true;
             this.ndCharPanel.active = true;
+            this.ndBtnList.active = true;
             this.ndBar.active = false;
             this.ndTips.string = '按下A/D键切换角色，空格键开始游戏';
             this.ndButtonStartGame.getComponent(NormalButton).onClick(() => {
@@ -77,6 +87,7 @@ export class Start extends Component {
 
 
     private startGame () {
+        if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
         GameContext.selectedPlayerId = this.ndCharPanel.getComponent(CharPanel).currIndex;
         director.loadScene('Prepare');
         // director.loadScene('Game')

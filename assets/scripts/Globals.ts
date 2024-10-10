@@ -47,7 +47,8 @@ export class Globals extends Component {
         })
         
         AudioManager.Instance.init();
-        AudioManager.Instance.playMusic('sounds/Load', GameContext.GameSound);
+        AudioManager.Instance.playMusic('sounds/Load', 1);
+        AudioManager.Instance.musicVolume = GameContext.GameSound;
         return Promise.all(promise);
     }
 

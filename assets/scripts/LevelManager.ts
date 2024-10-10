@@ -1,6 +1,4 @@
 import { _decorator, Component, Node, TiledMap, TiledMapAsset, UITransform, Vec3 } from 'cc';
-import { ResUtil } from './ResUtil';
-import { Util } from './Util';
 import { GameContext } from './GameContext';
 const { ccclass, property } = _decorator;
 

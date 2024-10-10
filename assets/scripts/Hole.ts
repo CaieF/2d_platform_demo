@@ -1,9 +1,7 @@
 import { _decorator, Collider, Collider2D, Component, math, Node, RigidBody2D, Vec3 } from 'cc';
-import { GameContext } from './GameContext';
 import { Constant } from './Constant';
 import { Globals } from './Globals';
 import { Util } from './Util';
-import { Explosion } from './Explosion';
 import { UseSkill } from './UseSkill';
 const { ccclass, property } = _decorator;
 

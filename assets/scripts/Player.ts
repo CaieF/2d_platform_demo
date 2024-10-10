@@ -3,10 +3,8 @@ const { ccclass, property } = _decorator;
 import { AxInput } from './AxInput';
 import { Util } from './Util';
 import { Constant } from './Constant';
-import { playIdle, playJump, playRun, playTakedamage } from './PlayAnimation';
+import { playIdle, playJump, playRun } from './PlayAnimation';
 import { GameContext } from './GameContext';
-import { Globals } from './Globals';
-import { SwordQi } from './SwordQi';
 import { CharData } from './CharData';
 import { UseSkill } from './UseSkill';
 const axInput = AxInput.instance;
@@ -28,6 +26,7 @@ export class Player extends Component {
     private callback: void;
     private randomMoveTimer: number = 0; // 随机移动计时器
     private randomMoveTime: number = 0.2; // 随机移动时间
+    
 
     hp: number = 100; // 血量
     maxHp: number = 100; // 最大血量
@@ -179,6 +178,8 @@ export class Player extends Component {
         if (this.playerStatus == Constant.CharStatus.ATTACK) return;
         if (this.playerStatus == Constant.CharStatus.SKILL0) return;
         if (this.playerStatus == Constant.CharStatus.SKILL1) return;
+        if (this.hp <= 0) return;
+
 
         this.rb = this.getComponent(RigidBody2D);
         let lv = this.rb!.linearVelocity;
@@ -200,7 +201,7 @@ export class Player extends Component {
         }
 
         // 按下按钮
-        if (axInput.is_action_just_pressed(KeyCode.KEY_A) || axInput.is_action_just_pressed(KeyCode.KEY_D)){
+        if (axInput.is_action_just_pressed(KeyCode.KEY_A) || axInput.is_action_just_pressed(KeyCode.KEY_D) || axInput.is_action_pressed(KeyCode.KEY_A) || axInput.is_action_pressed(KeyCode.KEY_D)){
             if (this.playerStatus == Constant.CharStatus.IDLE) {
                 this.playerStatus = Constant.CharStatus.RUN;
             }
@@ -208,6 +209,9 @@ export class Player extends Component {
 
         // 水平移动
         if (this.playerStatus == Constant.CharStatus.RUN || this.playerStatus == Constant.CharStatus.JUMP) {
+            if (this.playerStatus == Constant.CharStatus.IDLE) {
+                this.playerStatus = Constant.CharStatus.RUN;
+            }
             if (axInput.is_action_pressed(KeyCode.KEY_A)){
                 lv.x = -this.speed / 2;
                 this.ndAni.setScale(-1, 1)
@@ -401,6 +405,8 @@ export class Player extends Component {
     playDeath() {
         this.display.armatureName = 'Death';
         this.display.playAnimation('Death', 1);
+        console.log(this.display);
+        
 
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
@@ -420,7 +426,7 @@ export class Player extends Component {
             switch(other.tag) {
                 case Constant.ColliderTag.ENEMY_ATTACK1:
                     if (this.playerStatus !== Constant.CharStatus.DEATH && this.playerStatus !== Constant.CharStatus.DODGE) {
-                        this.hurt(100);
+                        this.hurt(1);
                         // Util.moveNode(this.node, 1, 0.0001);
                     }
                     break;
@@ -468,16 +474,25 @@ export class Player extends Component {
         
         
         Util.showText( `${damage}`, '#DC143C' ,this.node.worldPosition, GameContext.ndTextParent);
+
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this._onEvent && this._onEvent.apply(this._target, [Player.Event.HURT, damage]);
+            this.playerStatus = Constant.CharStatus.DEATH;
+        }
+
+
         if (this.hp > 0) {
             this._onEvent && this._onEvent.apply(this._target, [Player.Event.HURT, damage]);
-            if ( this.playerStatus !== Constant.CharStatus.ATTACK && this.playerStatus !== Constant.CharStatus.TAKEDAMAGE && this.playerStatus !== Constant.CharStatus.SKILL0 && this.playerStatus !== Constant.CharStatus.SKILL1 && this.playerStatus !== Constant.CharStatus.SKILL2) {
+            if ( this.playerStatus !== Constant.CharStatus.ATTACK && 
+                this.playerStatus !== Constant.CharStatus.TAKEDAMAGE && 
+                this.playerStatus !== Constant.CharStatus.SKILL0 && 
+                this.playerStatus !== Constant.CharStatus.SKILL1 && 
+                this.playerStatus !== Constant.CharStatus.SKILL2) {
                 this.playerStatus = Constant.CharStatus.TAKEDAMAGE;
             } 
             // console.log(`HP: ${this.hp}, Status: ${this.playerStatus}`);
-        } else {
-            this.hp = 0;
-            this.playerStatus = Constant.CharStatus.DEATH;
-        }   
+        } 
     }
 
     // 恢复HP

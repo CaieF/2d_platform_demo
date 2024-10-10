@@ -3,15 +3,13 @@ import { Constant } from "./Constant";
 import { Globals } from "./Globals";
 import { GameContext } from "./GameContext";
 import { CharData } from "./CharData";
-import { NormalButton } from "./NormalButton";
-import { SoundBar } from "./SoundBar";
 
 export class Util {
   
   // 给墙体添加碰撞组件
   static setWall(Map: TiledMap) {
     // Map.getComponent(UITransform).setAnchorPoint(0,0); // 设置锚点
-    // PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
+    PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
     
     // 获取地图墙体
     let tiledSize:Size = Map.getTileSize(); // 得到每一小块的大小

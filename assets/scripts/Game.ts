@@ -12,6 +12,7 @@ import { NormalButton } from './NormalButton';
 import { ButtonEvent } from './ButtonEvent';
 import { ResUtil } from './ResUtil';
 import { AudioManager } from './AudioManager';
+import { SettingPanel } from './SettingPanel';
 const { ccclass, property } = _decorator;
 
 @ccclass('Game')
@@ -21,31 +22,36 @@ export class Game extends Component {
     @property(Node) ndTextParent: Node;
     @property(Node) ndLevelManager: Node;
     // @property(TiledMap) Map: TiledMap;
-    @property(Node) ndPlayerMessage: Node;
+    @property(Node) ndPlayerMessage: Node;  // 角色信息
+    @property(Node) ndBossMessage: Node;    // boss信息
     @property(Node) ndWeaponParent: Node;
     @property(Node) ndWeaponParent0: Node;
     @property(Node) ndBtnSettingButton: Node; // 设置按钮
     @property(Node) ndSettingPanel: Node; // 设置面板
     @property(Node) ndDeathPanel: Node; // 死亡面板
     @property(Node) ndLoadingPanel: Node; // 加载面板
+    @property(Node) ndWinPanel: Node; // 胜利面板
+    @property(Node) ndCamera: Node;
     map: TiledMap;
 
     private _ndLifeBar: Node;
     private _ndExpBar: Node;
     private _ndLevel: Node;
+    private _ndBossLifeBar: Node;
+    private _BossName: Node;
+    private _BossLifeBar: ProgressBar;
 
     private _sk0Button: SkillButton;
     private _sk1Button: SkillButton;
     private _sk2Button: SkillButton;
     private _sk3Button: SkillButton;
     protected async onLoad() {
-        // AudioManager.Instance.stopMusic();
         
-
         // 相关父节点赋值
         // this.node.getChildByName('Map').TiledMap
         GameContext.GameStatus = Constant.GameStatus.LOADING;
         this.ndLoadingPanel.active = true;
+        GameContext.ndCamera = this.ndCamera;
         GameContext.ndPlayerParents = this.ndPlayerParents;
         GameContext.ndTextParent = this.ndTextParent; 
         
@@ -58,6 +64,10 @@ export class Game extends Component {
         this._ndLifeBar = this.ndPlayerMessage.getChildByName('LifeBar');
         this._ndExpBar = this.ndPlayerMessage.getChildByName('ExpBar');
         this._ndLevel = this.ndPlayerMessage.getChildByName('Level');
+
+        // Boss 生命条 boss名字
+        this._ndBossLifeBar = this.ndBossMessage.getChildByName('LifeBar');
+        this._BossName = this.ndBossMessage.getChildByName('name');
         
         this._loadPlayer(); // 加载角色
         await this.loadLevel(GameContext.selectedLevelId) // 加载地图
@@ -74,13 +84,14 @@ export class Game extends Component {
         //     this.ndLoadingPanel.active = false;
         // }, 0.5)
         this.ndLoadingPanel.active = false;
+        // this.ndWinPanel.active = false;
     }
 
     protected async onEnable() {
         
-
+        
         GameContext.GameScene = Constant.GameScene.Game;
-        AudioManager.Instance.playMusic('sounds/Game', GameContext.GameSound);
+        AudioManager.Instance.playMusic('sounds/Game', 1);
         this._rebindSkillButtons();
         // 设置按钮键盘事件
         this.ndBtnSettingButton.getComponent(NormalButton).onKeyEsc(() => {
@@ -110,10 +121,9 @@ export class Game extends Component {
                     lifeBar.setLabel(GameContext.player.hp, GameContext.player.maxHp);
                     break;
                 case Player.Event.DEATH:
-                    lifeBar.setProgress(0);
-                    lifeBar.setLabel(0, GameContext.player.maxHp);
                     this.ndDeathPanel.active = true;
-                    AudioManager.Instance.playMusic('sounds/Requiem', GameContext.GameSound);
+                    AudioManager.Instance.playMusic('sounds/Requiem', 1);
+                    this.ndDeathPanel.getComponent(SettingPanel).onPlayerDeath();
                     Util.applyPause();
                     break;
                 case Player.Event.ADD_EXP:
@@ -132,37 +142,87 @@ export class Game extends Component {
     }
     async start() {
         GameContext.GameStatus = Constant.GameStatus.RUNNING;
-        this.schedule(this._spawnEnemy, 2);
+        this.scheduleOnce(this._spawnEnemy, 2);
     }
 
     // 刷怪逻辑
     private _spawnEnemy() {
+        const selectedLevel = GameContext.levels[GameContext.selectedLevelId];
+        if (!selectedLevel) return;
+        console.log(selectedLevel);
         const minX = -230;
         const maxX = 90;
         const Y = 50;
-        const createOne = () => {
+        const createOne = (enemyId: number) => {
+            if (!enemyId) return;
+            const enemyConfigData = CharData.enemyConfig[enemyId] || CharData.enemyConfig[1];
             const x = randomRangeInt(minX, maxX);
             const y = Y;
-            const node = Globals.getNode(Constant.PrefabUrl.SKELETON, GameContext.ndEnemyParents);
+            const node = Globals.getNode(enemyConfigData.prefabUrl, GameContext.ndEnemyParents);
             node.setPosition(x, y);
             const enemy = node.getComponent(Enemy);
-            enemy.hp = 100;
-            enemy.speed = randomRangeInt(6, 12);
+            enemy.isBoss = enemyConfigData.isBoss;
+            enemy.enemyId = enemyConfigData.enemyId;
+            enemy.hp = enemyConfigData.hp;
+            enemy.maxHp = enemyConfigData.hp;
+            enemy.speed = randomRangeInt(enemyConfigData.minSpeed, enemyConfigData.maxSpeed);
+            enemy.chaseDistance = enemyConfigData.chaseDistance;
+            enemy.attackRange = enemyConfigData.attackRange;
             enemy.enemyStatus = Constant.CharStatus.IDLE;
+            enemy.attackNumber = enemyConfigData.attackNumber;
+            enemy.HitColliderOffsetX = enemyConfigData.HitColliderOffsetX;
+            if (enemyConfigData.isBoss) {
+                this.ndBossMessage.active = true;
+                GameContext.ndBoss = node;
+                GameContext.boss = enemy;
+                this._BossName.getComponent(Label).string = ` ${enemyConfigData.name}`;
+                this._BossLifeBar = this._ndBossLifeBar.getComponent(ProgressBar);
+                this._BossLifeBar.setProgress(1);
+                this._BossLifeBar.setLabel(enemyConfigData.hp, enemyConfigData.hp);
+            }
             enemy.onEnemyEvent((event: number) => {
                 switch (event) {
                     case Enemy.Event.DEATH:
-                        GameContext.player.addExp(60);
+                        GameContext.player.addExp(enemyConfigData.exp);
                         break;
+                    case Enemy.Event.HURT:
+                        if (!enemy.isBoss) return;
+                        this._BossLifeBar.setProgress(GameContext.boss.hp / GameContext.boss.maxHp);
+                        this._BossLifeBar.setLabel(GameContext.boss.hp, GameContext.boss.maxHp);
+                        break;
+                    case Enemy.Event.WIN:
+                        this.ndWinPanel.active = true;
+                        Util.applyPause();
+                        break;
+                        // AudioManager.Instance.playMusic('sounds/Requiem', 1);
                     default:
                         break;
                 }
             })
         }
 
-        if (GameContext.ndEnemyParents.children.length < 2) {
-            createOne();
+        console.log(selectedLevel.enemies.length);
+        
+        // 刷新小怪
+        if (selectedLevel.enemies.length > 0) {
+            const numberOfEnemies = 5; // 小怪数量
+            for (let i = 0; i < numberOfEnemies; i++) {
+                const randomEnemyId = selectedLevel.enemies[randomRangeInt(0, selectedLevel.enemies.length)];
+                createOne(randomEnemyId);
+            }
         }
+
+        // 刷新boss
+        if (selectedLevel.boss.length > 0) {
+            const BossId = selectedLevel.boss[0];
+            createOne(BossId);
+        }
+
+
+        // if (GameContext.ndEnemyParents.children.length < 1) {
+        //     createOne(101);
+        // }
+        // createOne(101);
     }
 
     // 加载角色

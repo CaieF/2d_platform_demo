@@ -5,7 +5,6 @@ import { GameContext } from './GameContext';
 import { Constant } from './Constant';
 import { NormalButton } from './NormalButton';
 import { CharPanel } from './CharPanel';
-import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Prepare')

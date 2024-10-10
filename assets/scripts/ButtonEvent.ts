@@ -7,6 +7,16 @@ import { SoundBar } from "./SoundBar";
 import { AudioManager } from "./AudioManager";
 
 export class ButtonEvent {
+
+  static getHome() {
+    Util.applyResume();
+    if (GameContext.GameScene === Constant.GameScene.Game) {
+      director.loadScene(Constant.GameScene.Prepare)
+      AudioManager.Instance.playMusic('sounds/Load', 1)
+    } else if (GameContext.GameScene === Constant.GameScene.Prepare) {
+      director.loadScene(Constant.GameScene.Start);
+    }
+  }
   // 设置按钮点击事件
   static setButtonEvent(ndButton: Node, buttonType: String, ndSettingPanel?: Node, ndSoundBar?: Node) {
     if (ndButton == null) return;
@@ -17,23 +27,20 @@ export class ButtonEvent {
           // 设置按钮 
           if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
           // AudioManager.Instance.playMusic('sounds/Requiem', GameContext.GameSound)
-          Util.applyPause();
+          if (GameContext.GameScene !== Constant.GameScene.Start) {
+            Util.applyPause();
+          }
+          GameContext.GameStatus = Constant.GameStatus.PAUSE;
           ndSettingPanel.active = !ndSettingPanel.active;
           break;
         case 'OK':
           // 取消按钮
           Util.applyResume();
-          ndSettingPanel.active = !ndSettingPanel.active;  
+          ndSettingPanel.active = !ndSettingPanel.active;
           break;
         case 'Home':
           // 返回按钮
-          Util.applyResume();
-          if (GameContext.GameScene === Constant.GameScene.Game) {
-            director.loadScene(Constant.GameScene.Prepare)
-            AudioManager.Instance.playMusic('sounds/Load', GameContext.GameSound)
-          } else if (GameContext.GameScene === Constant.GameScene.Prepare) {
-            director.loadScene(Constant.GameScene.Start);
-          }
+          this.getHome();
           // director.loadScene('Start');
           break;
         case 'Reload':
@@ -52,10 +59,18 @@ export class ButtonEvent {
           if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
           if (GameContext.GameScene === Constant.GameScene.Game) {
             director.loadScene(Constant.GameScene.Prepare)
-            AudioManager.Instance.playMusic('sounds/Load', GameContext.GameSound)
+            AudioManager.Instance.playMusic('sounds/Load', 1)
           } else if (GameContext.GameScene === Constant.GameScene.Prepare) {
             director.loadScene(Constant.GameScene.Start);
           }
+          break;
+        case 'Next':
+          // 下一关
+          if (GameContext.selectedLevelId < GameContext.levels.length - 1) {
+            GameContext.selectedLevelId += 1;
+          }
+          Util.applyResume();
+          director.loadScene(GameContext.GameScene);
           break;
         default:
           break;

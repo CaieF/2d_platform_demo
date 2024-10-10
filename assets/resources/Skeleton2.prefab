@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "Skeleton",
+    "_name": "Skeleton2",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Skeleton",
+    "_name": "Skeleton2",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -108,8 +108,8 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 1.5,
-      "y": 1.5,
+      "x": 1.2,
+      "y": 1.2,
       "z": 1
     },
     "_mobility": 0,
@@ -136,8 +136,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 24,
-      "height": 32
+      "width": 64,
+      "height": 64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -176,11 +176,11 @@
     "premultipliedAlpha": false,
     "_defaultArmatureIndexValue": 0,
     "_dragonAsset": {
-      "__uuid__": "ddf711c5-2aaa-45d2-bedf-97ae5fd77330",
+      "__uuid__": "cc8b45ad-ff07-46a7-8328-35db8ab3c30f",
       "__expectedType__": "dragonBones.DragonBonesAsset"
     },
     "_dragonAtlasAsset": {
-      "__uuid__": "d1fe07da-bfe5-440b-a35e-1a5c44a79807",
+      "__uuid__": "2fccd780-b604-44c6-8d7c-cef129ce2c53",
       "__expectedType__": "dragonBones.DragonBonesAtlasAsset"
     },
     "_armatureName": "Idle",
@@ -259,8 +259,8 @@
     "_restitution": 0.7,
     "_offset": {
       "__type__": "cc.Vec2",
-      "x": -8.5,
-      "y": -4.7
+      "x": -3,
+      "y": 0.1
     },
     "_size": {
       "__type__": "cc.Size",
@@ -348,12 +348,12 @@
     "_restitution": 0,
     "_offset": {
       "__type__": "cc.Vec2",
-      "x": 22.5,
-      "y": -13.9
+      "x": 1.2,
+      "y": 2.4
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 40.4,
+      "width": 63.3,
       "height": 19.9
     },
     "_id": ""

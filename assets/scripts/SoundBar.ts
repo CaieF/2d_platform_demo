@@ -7,6 +7,7 @@ const { ccclass, property } = _decorator;
 @ccclass('SoundBar')
 export class SoundBar extends Component {
     @property (Label) ndLabel: Label = null;
+    // isSound: boolean = true; // 是否开启声音
 
     static readonly Event = {
         NOSOUND: 0,
@@ -16,7 +17,13 @@ export class SoundBar extends Component {
     private _target: any;
 
     protected onEnable(): void {
-        this.updateVolumeLabel(GameContext.GameSound);
+        if (GameContext.isSound) {
+            this.updateVolumeLabel(GameContext.GameSound);
+        } else {
+            this.updateVolumeLabel(0);
+        }
+
+        
 
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this, true);
         this.node.on(Node.EventType.TOUCH_MOVE, this.onTouchMove, this, true);
@@ -69,8 +76,10 @@ export class SoundBar extends Component {
 
     updateVolumeLabel(value: number) {
         if (value > 0) {
+            GameContext.isSound = true;
             this._onEvent && this._onEvent.apply(this._target, [SoundBar.Event.SOUND])
         } else if (value === 0) {
+            GameContext.isSound = false;
             this._onEvent && this._onEvent.apply(this._target, [SoundBar.Event.NOSOUND])
         }
         this.node.getComponent(ProgressBar).setProgress(value);
