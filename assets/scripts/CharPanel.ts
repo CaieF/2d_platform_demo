@@ -3,6 +3,7 @@ import { NormalButton } from './NormalButton';
 import { Constant } from './Constant';
 import { AxInput } from './AxInput';
 import { GameContext } from './GameContext';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 const axInput = AxInput.instance;
 
@@ -25,24 +26,28 @@ export class CharPanel extends Component {
 
         this.ndBtnLeft.getComponent(NormalButton).onClick(() => {
             if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            AudioManager.Instance.playSound('sounds/toggle', 1);
             this.moveLeft();
             this.updateCharItemState();
         });
 
         this.ndBtnLeft.getComponent(NormalButton).onKeyLeft(() => {
             if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            AudioManager.Instance.playSound('sounds/toggle', 1);
             this.moveLeft();
             this.updateCharItemState();
         })
 
         this.ndBtnRight.getComponent(NormalButton).onClick(() => {
             if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            AudioManager.Instance.playSound('sounds/toggle', 1);
             this.moveRight();
             this.updateCharItemState();
         });
 
         this.ndBtnRight.getComponent(NormalButton).onKeyRight(() => {
             if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            AudioManager.Instance.playSound('sounds/toggle', 1);
             this.moveRight();
             this.updateCharItemState();
         })

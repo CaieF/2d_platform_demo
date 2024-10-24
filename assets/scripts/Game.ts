@@ -80,9 +80,6 @@ export class Game extends Component {
         } else {
             console.log('this.map.tmxAsset no');     
         }
-        // this.scheduleOnce(() => {
-        //     this.ndLoadingPanel.active = false;
-        // }, 0.5)
         this.ndLoadingPanel.active = false;
         // this.ndWinPanel.active = false;
     }
@@ -149,28 +146,23 @@ export class Game extends Component {
     private _spawnEnemy() {
         const selectedLevel = GameContext.levels[GameContext.selectedLevelId];
         if (!selectedLevel) return;
-        console.log(selectedLevel);
         const minX = -230;
         const maxX = 90;
         const Y = 50;
         const createOne = (enemyId: number) => {
             if (!enemyId) return;
+            // 相关数值配置
             const enemyConfigData = CharData.enemyConfig[enemyId] || CharData.enemyConfig[1];
             const x = randomRangeInt(minX, maxX);
             const y = Y;
             const node = Globals.getNode(enemyConfigData.prefabUrl, GameContext.ndEnemyParents);
             node.setPosition(x, y);
             const enemy = node.getComponent(Enemy);
-            enemy.isBoss = enemyConfigData.isBoss;
-            enemy.enemyId = enemyConfigData.enemyId;
-            enemy.hp = enemyConfigData.hp;
-            enemy.maxHp = enemyConfigData.hp;
-            enemy.speed = randomRangeInt(enemyConfigData.minSpeed, enemyConfigData.maxSpeed);
-            enemy.chaseDistance = enemyConfigData.chaseDistance;
-            enemy.attackRange = enemyConfigData.attackRange;
-            enemy.enemyStatus = Constant.CharStatus.IDLE;
-            enemy.attackNumber = enemyConfigData.attackNumber;
-            enemy.HitColliderOffsetX = enemyConfigData.HitColliderOffsetX;
+            enemy.setValue(enemyConfigData.enemyId, enemyConfigData.isBoss, 
+                randomRangeInt(enemyConfigData.minSpeed, enemyConfigData.maxSpeed), 
+                enemyConfigData.hp, enemyConfigData.chaseDistance, enemyConfigData.attackRange, 
+                enemyConfigData.attackNumber, enemyConfigData.HitColliderOffsetX);
+                enemy.enemyStatus = Constant.CharStatus.IDLE;
             if (enemyConfigData.isBoss) {
                 this.ndBossMessage.active = true;
                 GameContext.ndBoss = node;
@@ -180,18 +172,24 @@ export class Game extends Component {
                 this._BossLifeBar.setProgress(1);
                 this._BossLifeBar.setLabel(enemyConfigData.hp, enemyConfigData.hp);
             }
-            enemy.onEnemyEvent((event: number) => {
+            enemy.onEnemyEvent((event: number, value: number) => { // 怪物事件
                 switch (event) {
                     case Enemy.Event.DEATH:
                         GameContext.player.addExp(enemyConfigData.exp);
                         break;
                     case Enemy.Event.HURT:
-                        if (!enemy.isBoss) return;
-                        this._BossLifeBar.setProgress(GameContext.boss.hp / GameContext.boss.maxHp);
-                        this._BossLifeBar.setLabel(GameContext.boss.hp, GameContext.boss.maxHp);
+                        if (GameContext.player.playerId === CharData.PlayersId.Player1) {
+                            GameContext.player.cure(value)
+                        }
+                        if (enemy.isBoss) {
+                            this._BossLifeBar.setProgress(GameContext.boss.hp / GameContext.boss.maxHp);
+                            this._BossLifeBar.setLabel(GameContext.boss.hp, GameContext.boss.maxHp);
+                        }
                         break;
                     case Enemy.Event.WIN:
                         this.ndWinPanel.active = true;
+                        AudioManager.Instance.playMusic('sounds/Win', 1);
+                        this.ndWinPanel.getComponent(SettingPanel).onPlayerDeath();
                         Util.applyPause();
                         break;
                         // AudioManager.Instance.playMusic('sounds/Requiem', 1);
@@ -201,11 +199,10 @@ export class Game extends Component {
             })
         }
 
-        console.log(selectedLevel.enemies.length);
         
         // 刷新小怪
         if (selectedLevel.enemies.length > 0) {
-            const numberOfEnemies = 5; // 小怪数量
+            const numberOfEnemies = 0; // 小怪数量
             for (let i = 0; i < numberOfEnemies; i++) {
                 const randomEnemyId = selectedLevel.enemies[randomRangeInt(0, selectedLevel.enemies.length)];
                 createOne(randomEnemyId);
@@ -218,17 +215,12 @@ export class Game extends Component {
             createOne(BossId);
         }
 
-
-        // if (GameContext.ndEnemyParents.children.length < 1) {
-        //     createOne(101);
-        // }
-        // createOne(101);
     }
 
     // 加载角色
     private _loadPlayer() {
         
-        const defaultPlayerId = CharData.Player1.playerId; // 默认角色ID
+        const defaultPlayerId = CharData.PlayersId.Player1; // 默认角色ID
         const selectedPlayerId = GameContext.selectedPlayerId;
 
         // 获取角色配置
@@ -283,23 +275,11 @@ export class Game extends Component {
 
     // 技能相关
     private _rebindSkillButtons() {
-        // 设置技能冷却
-        switch (GameContext.selectedPlayerId) {
-            case CharData.Player1.playerId:
-                this._setSkillColdDown(CharData.Player1.sk0Cd, CharData.Player1.sk1Cd, CharData.Player1.sk2Cd, CharData.Player1.sk3Cd)
-                break;
-            case CharData.Player2.playerId:
-                this._setSkillColdDown(CharData.Player2.sk0Cd, CharData.Player2.sk1Cd, CharData.Player2.sk2Cd, CharData.Player2.sk3Cd)
-                break;
-            case CharData.Player3.playerId:
-                this._setSkillColdDown(CharData.Player3.sk0Cd, CharData.Player3.sk1Cd, CharData.Player3.sk2Cd, CharData.Player3.sk3Cd)
-                break;
-            case CharData.Player4.playerId:
-                this._setSkillColdDown(CharData.Player4.sk0Cd, CharData.Player4.sk1Cd, CharData.Player4.sk2Cd, CharData.Player4.sk3Cd)
-                break;
-            default:
-                break;
-        }
+        const defaultPlayerId = CharData.PlayersId.Player1;
+        const selectedPlayerId = GameContext.selectedPlayerId;
+
+        const playerConfigData = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
+        this._setSkillColdDown(playerConfigData.sk0Cd, playerConfigData.sk1Cd, playerConfigData.sk2Cd, playerConfigData.sk3Cd);
 
         this._skOnClick(this._sk0Button, Constant.CharStatus.SKILL0);
         this._skOnClick(this._sk1Button, Constant.CharStatus.SKILL1);

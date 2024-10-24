@@ -7,6 +7,7 @@ import { playIdle, playJump, playRun } from './PlayAnimation';
 import { GameContext } from './GameContext';
 import { CharData } from './CharData';
 import { UseSkill } from './UseSkill';
+import { AudioManager } from './AudioManager';
 const axInput = AxInput.instance;
 
 @ccclass('Player')
@@ -27,6 +28,14 @@ export class Player extends Component {
     private randomMoveTimer: number = 0; // 随机移动计时器
     private randomMoveTime: number = 0.2; // 随机移动时间
     
+    public get playerId(): number {
+        return this._playerId;
+    }
+
+    public set playerId(value: number) {
+        this._playerId = value;
+    }
+
 
     hp: number = 100; // 血量
     maxHp: number = 100; // 最大血量
@@ -104,21 +113,11 @@ export class Player extends Component {
 
     protected onLoad(): void {
         this._playerId = GameContext.selectedPlayerId;
-        // 加载攻击范围
-        switch(this._playerId) {
-            case CharData.Player1.playerId:
-                this._attack1Offset = CharData.Player1.atk1Offset;
-                break;
-            case CharData.Player2.playerId:
-                this._attack1Offset = CharData.Player2.atk1Offset;
-                break;
-            case CharData.Player4.playerId:
-                this._attack1Offset = CharData.Player4.atk1Offset;
-                break;
-            default:
-                this._attack1Offset = CharData.Player1.atk1Offset;
-                break;
-        }
+        const defaultPlayerId = CharData.PlayersId.Player1;
+        const selectedPlayerId = GameContext.selectedPlayerId;
+
+        const playerConfigData = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
+        this._attack1Offset = playerConfigData.atk1Offset!;
         if (this.ndAni) {
             this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         }
@@ -255,13 +254,13 @@ export class Player extends Component {
         this.display.playAnimation('Attack1', 1);
 
         switch (this._playerId) {
-            case CharData.Player3.playerId:
+            case CharData.PlayersId.Player3:
                 UseSkill.shootArrow(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                 break;
-            case CharData.Player4.playerId:
+            case CharData.PlayersId.Player4:
                 UseSkill.shootFireBall(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                 break;
-            case CharData.Player5.playerId:
+            case CharData.PlayersId.Player5:
                 this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
                     Util.checkCollider(this.attack1Collider, true);
                 break;
@@ -290,7 +289,7 @@ export class Player extends Component {
         this.display.armatureName = 'Attack2';
         this.display.playAnimation('Attack2', 1);
         
-        if (this._playerId === CharData.Player4.playerId) {
+        if (this._playerId === CharData.PlayersId.Player4) {
             this.callback = this.scheduleOnce(() => {
                 this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
                 Util.checkCollider(this.attack1Collider, true);
@@ -299,17 +298,20 @@ export class Player extends Component {
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
             switch(this._playerId) {
-                case CharData.Player1.playerId:
+                case CharData.PlayersId.Player1:
                     UseSkill.shootSwordQi(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                     break;
-                case CharData.Player2.playerId:
+                case CharData.PlayersId.Player2:
                     UseSkill.throwStone(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                     break;
-                case CharData.Player3.playerId:
+                case CharData.PlayersId.Player3:
                     UseSkill.shootElectorArrow(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                     break;
-                case CharData.Player4.playerId:
+                case CharData.PlayersId.Player4:
                     Util.checkCollider(this.attack1Collider, false);
+                    break;
+                case CharData.PlayersId.Player5:
+                    UseSkill.shootWaterBall(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                     break;
                 default:
                     break;
@@ -324,10 +326,10 @@ export class Player extends Component {
         this.display.armatureName = 'Attack3';
         this.display.playAnimation('Attack3', 1);
         switch(this._playerId) {
-            case CharData.Player3.playerId:
+            case CharData.PlayersId.Player3:
                 UseSkill.shootThunderSplash(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                 break;
-            case CharData.Player4.playerId:
+            case CharData.PlayersId.Player4:
                 this.cure(5)
             default:
                 break;
@@ -336,14 +338,14 @@ export class Player extends Component {
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
             switch(this._playerId) {
-                case CharData.Player1.playerId:
+                case CharData.PlayersId.Player1:
                     UseSkill.shootSwordGroup(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                     break;
-                case CharData.Player2.playerId:
+                case CharData.PlayersId.Player2:
                     UseSkill.shootHole(this.ndSkillStart.worldPosition);
                     break;
-                case CharData.Player3.playerId:
-                    // UseSkill.shootThunderSplash(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
+                case CharData.PlayersId.Player5:
+                    UseSkill.shootWaterBlast(new Vec3(this.ndSkillStart.worldPosition.x, this.ndSkillStart.worldPosition.y + 40, this.ndSkillStart.worldPosition.z), this.ndAni.scale.x);
                     break;
                 default:
                     break;
@@ -389,7 +391,8 @@ export class Player extends Component {
 
     // 受击状态
     playTakedamage() {
-        // this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
+        AudioManager.Instance.playSound('sounds/hit', 1);
+        
         this.display.armatureName = 'TakeDamage';
         this.display.playAnimation('TakeDamage', 1);
 
@@ -403,10 +406,9 @@ export class Player extends Component {
 
     // 死亡状态
     playDeath() {
+        AudioManager.Instance.playSound('sounds/death', 0.8);
         this.display.armatureName = 'Death';
-        this.display.playAnimation('Death', 1);
-        console.log(this.display);
-        
+        this.display.playAnimation('Death', 1); 
 
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
@@ -426,7 +428,7 @@ export class Player extends Component {
             switch(other.tag) {
                 case Constant.ColliderTag.ENEMY_ATTACK1:
                     if (this.playerStatus !== Constant.CharStatus.DEATH && this.playerStatus !== Constant.CharStatus.DODGE) {
-                        this.hurt(1);
+                        this.hurt(10);
                         // Util.moveNode(this.node, 1, 0.0001);
                     }
                     break;

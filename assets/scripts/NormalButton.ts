@@ -1,4 +1,5 @@
 import { _decorator, Component, EventKeyboard, Input, input, KeyCode, Node, Sprite } from 'cc';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('NormalButton')
@@ -49,8 +50,8 @@ export class NormalButton extends Component {
 
     onMousDown() {
         if (!this.isActivated) return;
-
-        this.node.setScale(0.98, 0.98);
+        // AudioManager.Instance.playSound('sounds/drop', 1);
+        this.node.setScale(0.95, 0.95);
     }
 
     onMouseUp() {
@@ -65,16 +66,20 @@ export class NormalButton extends Component {
         // event.propagationStopped = true;
         switch (event.keyCode) {
             case KeyCode.KEY_A:
-                this._LeftCb && this.node.setScale(0.98, 0.98);
+                // AudioManager.Instance.playSound('sounds/drop', 1);
+                this._LeftCb && this.node.setScale(0.95, 0.95);
                 break;
             case KeyCode.KEY_D:
-                this._RightCb && this.node.setScale(0.98, 0.98);
+                // AudioManager.Instance.playSound('sounds/drop', 1);
+                this._RightCb && this.node.setScale(0.95, 0.95);
                 break;
             case KeyCode.SPACE:
-                this._SpaceCb && this.node.setScale(0.98, 0.98);
+                // AudioManager.Instance.playSound('sounds/drop', 1);
+                this._SpaceCb && this.node.setScale(0.95, 0.95);
                 break;
             case KeyCode.ESCAPE:
-                this._EscCb && this.node.setScale(0.98, 0.98);
+                // AudioManager.Instance.playSound('sounds/drop', 1);
+                this._EscCb && this.node.setScale(0.95, 0.95);
                 break;
             default:
                 break;

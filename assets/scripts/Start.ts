@@ -88,6 +88,7 @@ export class Start extends Component {
 
     private startGame () {
         if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+        AudioManager.Instance.playSound('sounds/open', 1);
         GameContext.selectedPlayerId = this.ndCharPanel.getComponent(CharPanel).currIndex;
         director.loadScene('Prepare');
         // director.loadScene('Game')

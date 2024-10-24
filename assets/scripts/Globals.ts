@@ -14,7 +14,6 @@ export class Globals extends Component {
     protected onLoad(): void {
         director.addPersistRootNode(this.node);
         // GameContext.AudioSource = this.node.getComponent(AudioSource);
-        console.log(AudioSource);
         
     }
 
@@ -47,8 +46,10 @@ export class Globals extends Component {
         })
         
         AudioManager.Instance.init();
-        AudioManager.Instance.playMusic('sounds/Load', 1);
         AudioManager.Instance.musicVolume = GameContext.GameSound;
+        AudioManager.Instance.soundVolume = Math.min(GameContext.GameSound *2, 1);
+        AudioManager.Instance.playMusic('sounds/Load', 1);
+        
         return Promise.all(promise);
     }
 

@@ -6,13 +6,14 @@ import { GameContext } from "./GameContext";
 import { Hole } from "./Hole";
 import { Arrow } from "./Arrow";
 import { Explosion } from "./Explosion";
+import { WaterBlast } from "./WaterBlast";
+import { Player } from "./Player";
 
 export class UseSkill{
 
   // 发送剑气
   static shootSwordQi(position: Vec3, scaleX: number) {
-        
-    const ndPlayer1Skill0 = Globals.getNode(Constant.PrefabUrl.PLAYER1_SKILL0, GameContext.ndWeaponParent);
+    const ndPlayer1Skill0 = Globals.getNode(Constant.PrefabUrl.SWORD_SPLASH, GameContext.ndWeaponParent);
     ndPlayer1Skill0.worldPosition = position;
     ndPlayer1Skill0.scale = (new Vec3(scaleX * 0.2, 0.2, 0));
     // ndPlayer1Skill0.setScale(this.ndAni.scale);aaaa
@@ -23,17 +24,26 @@ export class UseSkill{
 
   // 发送乱剑
   static shootSwordGroup(position: Vec3, scaleX: number) {
-    const ndPlayer1Skill1 = Globals.getNode(Constant.PrefabUrl.PLAYER1_SKILL1, GameContext.ndWeaponParent);
+    const ndPlayer1Skill1 = Globals.getNode(Constant.PrefabUrl.SWORD_GROUP, GameContext.ndWeaponParent);
     ndPlayer1Skill1.worldPosition = position
-    ndPlayer1Skill1.scale = (new Vec3(scaleX * 0.3, 0.3, 0));
+    ndPlayer1Skill1.scale = (new Vec3(scaleX * 0.8, 0.8, 0));
     const pk1 = ndPlayer1Skill1.getComponent(SwordQi);
     pk1.isMoving = false;
   }
 
   // 释放黑洞
   static shootHole(position: Vec3) {
-    const ndPlayer2Skill1 = Globals.getNode(Constant.PrefabUrl.PLAYER2_SKILL1, GameContext.ndWeaponParent);
-    ndPlayer2Skill1.worldPosition = position;
+    // const ndPlayer2Skill1 = Globals.getNode(Constant.PrefabUrl.PLAYER2_SKILL1, GameContext.ndWeaponParent);
+    // ndPlayer2Skill1.worldPosition = position;
+    const ndRock = Globals.getNode(Constant.PrefabUrl.ROCK, GameContext.ndWeaponParent);
+    ndRock.worldPosition = position;
+    const pk = ndRock.getComponent(WaterBlast);
+    pk.isAbstract = true;
+    pk.isMoving = false;
+    pk.existTimer = 3;
+    pk.isRatation = true;
+    pk.attractionRange = 500;  // 吸引力范围
+    pk.attractionForce = 300;  // 吸引力大小
   }
 
   // 扔石头
@@ -103,6 +113,37 @@ export class UseSkill{
     pk.speed = 6;
     pk.isHit = false;
     pk.isFireBall = true;
+  }
+
+  // 释放水球
+  static shootWaterBall(position: Vec3, scaleX: number) {
+    const ndWaterBall = Globals.getNode(Constant.PrefabUrl.WATER_BALL, GameContext.ndWeaponParent);
+    ndWaterBall.worldPosition = position;
+    ndWaterBall.scale = (new Vec3(scaleX * 1, 1, 0));
+    const pk = ndWaterBall.getComponent(WaterBlast);
+    pk.isMoveLeft = scaleX < 0 ? true : false;
+    pk.isMoving = true;
+    pk.speed = 2;
+    pk.existTimer = 2;
+    pk.isAbstract = false;
+    pk.isRatation = false;
+  }
+
+
+  // 释放水龙卷
+  static shootWaterBlast(position: Vec3, scaleX: number) {
+    const ndWaterBlast = Globals.getNode(Constant.PrefabUrl.WATER_BLAST, GameContext.ndWeaponParent);
+    ndWaterBlast.worldPosition = position;
+    const pk = ndWaterBlast.getComponent(WaterBlast);
+    pk.isMoveLeft = scaleX < 0 ? true : false;
+    pk.existTimer = 3;
+    pk.isMoving = true;
+    pk.speed = 1;
+    pk.existTimer = 3;
+    pk.isAbstract = true;
+    pk.isRatation = false;
+    pk.attractionRange = 150;  // 吸引力范围
+    pk.attractionForce = 400;  // 吸引力大小
   }
 
   static redExplosion(position: Vec3, scale: number) {

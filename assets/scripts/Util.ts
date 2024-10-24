@@ -138,7 +138,7 @@ export class Util {
 
   // 加载角色头像
   static loadPlayerAvatar(ndPlayerMessage: Node) {
-    const defaultPlayerId = CharData.Player1.playerId; // 默认角色ID
+    const defaultPlayerId = CharData.PlayersId.Player1; // 默认角色ID
     const selectedPlayerId = GameContext.selectedPlayerId;
     // 获取角色配置
     const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];

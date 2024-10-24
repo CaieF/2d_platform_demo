@@ -15,7 +15,6 @@ export class LevelManager extends Component {
     }
     start() {
         // Util.setWall(this.map);
-        console.log(this.map);
         
     }
 

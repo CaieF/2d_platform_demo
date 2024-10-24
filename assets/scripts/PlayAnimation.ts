@@ -40,3 +40,12 @@ export function playDodge(display: dragonBones.ArmatureDisplay) {
   display.armatureName = 'Dodge';
   display.playAnimation('Dodge', 1);
 }
+
+// 技能开始
+export function playStart(display: dragonBones.ArmatureDisplay) {
+  display.armatureName = 'Start';
+  display.playAnimation('Start', 1);
+}
+
+// // 技能结束
+// export function

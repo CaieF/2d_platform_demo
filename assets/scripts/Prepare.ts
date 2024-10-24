@@ -5,6 +5,7 @@ import { GameContext } from './GameContext';
 import { Constant } from './Constant';
 import { NormalButton } from './NormalButton';
 import { CharPanel } from './CharPanel';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Prepare')
@@ -27,11 +28,13 @@ export class Prepare extends Component {
         Util.loadPlayerAvatar(this.ndPlayerMessage);
         this.ndBtnStartGame.getComponent(NormalButton).onClick(() => {
             if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            AudioManager.Instance.playSound('sounds/open', 1);
             this.startGame();
         })
 
         this.ndBtnStartGame.getComponent(NormalButton).onKeySpace(() => {
             if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+            AudioManager.Instance.playSound('sounds/open', 1);
             this.startGame();
         })
     }

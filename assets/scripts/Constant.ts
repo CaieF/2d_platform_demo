@@ -48,24 +48,29 @@ export class Constant {
     PLAYER3_AVATAR: 'Player3Avatar', // 角色3头像
     PLAYER4_AVATAR: 'Player4Avatar', // 角色4头像
     PLAYER5_AVATAR: 'Player5Avatar', // 角色4头像
-    PLAYER1_SKILL0: 'Player1Skill0', // 角色1技能0
     PLAYER1_SKILL1: 'Player1Skill1', // 角色1技能1
     PLAYER2_SKILL0: 'Player2Skill0', // 角色2技能0
-    PLAYER2_SKILL1: 'Player2Skill1', // 角色2技能1
     PLAYER3_SKILL0: 'Player3Skill0', // 角色3技能0
     PLAYER3_SKILL1: 'Player3Skill1', // 角色3技能1
     SKILL_BAR1: 'SkillBar1', // 角色1技能栏
     SKILL_BAR2: 'SkillBar2', // 角色2技能栏
     SKILL_BAR3: 'SkillBar3', // 角色3技能栏
     SKILL_BAR4: 'SkillBar4', // 角色4技能栏
-    SKILL_BAR5: 'SkillBar4', // 角色5技能栏
+    SKILL_BAR5: 'SkillBar5', // 角色5技能栏
     BOSS1: 'Boss1', // boss1
+    BOSS2: 'Boss2', // boss2
+    SWORD_SPLASH: 'SwordSplash', // 剑气
+    SWORD_GROUP: 'SwordGroup', // 剑气群
     ARROW: 'Arrow', // 箭矢
     FIRE_BALL: 'FireBall', // 火球
     THUNDER_STRIKE: 'ThunderStrike', // 闪电
+    WATER_BLAST: 'WaterBlast', // 水龙卷
+    WATER_BALL: 'WaterBall', // 水球
+    ROCK: 'Rock', // 岩石
     RED_EXPLOSION: 'RedExplosion', // 红色爆炸
     SKELETON: 'Skeleton', // 骷髅
     SKELETON2: 'Skeleton2', // 骷髅2 
+    SKELETON3: 'Skeleton3', // 骷髅3
   }
 
   static readonly ColliderTag = {

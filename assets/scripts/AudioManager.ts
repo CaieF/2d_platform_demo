@@ -270,16 +270,17 @@ export class AudioManager extends Component {
 
     public playSound(name: string, volumeScale: number = 1) {
 
-        if (this.soundVolume === 0) return;
+        // if (this.soundVolume === 0) return;
 
         let clip = this._cachedAudioClipMap[name];
-
+        
         const soundAudioSource = this.m_soundSource!;
+        
 
         if (clip) {
 
             let volume = Math.min(1, Math.max(0, this.soundVolume * volumeScale));
-
+            
             soundAudioSource.playOneShot(clip, volume);
 
         } else {
@@ -297,10 +298,12 @@ export class AudioManager extends Component {
                     }
 
                     this._cachedAudioClipMap[name] = audioClip;
+                    
 
                     let volume = Math.min(1, Math.max(0, this.soundVolume * volumeScale));
 
                     soundAudioSource.playOneShot(audioClip, volume);
+                    
 
                 })
 
@@ -317,7 +320,7 @@ export class AudioManager extends Component {
     set soundVolume(value: number) {
 
         this.m_soundVolume = Math.min(1, Math.max(0, value));
-
+        this.m_soundSource.volume = value;
     }
 
 }

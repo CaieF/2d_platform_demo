@@ -8,13 +8,13 @@
   {
       "level": 2,
       "map": "map/map2",
-      "enemies": [2],
-      "boss": []
+      "enemies": [3],
+      "boss": [101]
   },
   {
       "level": 3,
       "map": "map/map3",
-      "enemies": [],
-      "boss": []
+      "enemies": [2],
+      "boss": [102]
   }
 ]

@@ -22,11 +22,11 @@ export class ButtonEvent {
     if (ndButton == null) return;
 
     ndButton.getComponent(NormalButton).onClick(() => {
+      AudioManager.Instance.playSound('sounds/drop', 0.8);
       switch (buttonType) {
         case "Setting":
           // 设置按钮 
           if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
-          // AudioManager.Instance.playMusic('sounds/Requiem', GameContext.GameSound)
           if (GameContext.GameScene !== Constant.GameScene.Start) {
             Util.applyPause();
           }
