@@ -23,7 +23,7 @@ export class CharData {
         speed: 12,  // 移动速度
         jump_speed: 10, // 跳跃速度
         atk1Offset: 14, // 攻击距离
-        sk0Cd: 200,  // 技能0冷却时间
+        sk0Cd: 2,  // 技能0冷却时间
         sk1Cd: 3,  // 技能1冷却时间
         sk2Cd: 1,  // 技能2冷却时间
         sk3Cd: 1,  // 技能3冷却时间
@@ -37,7 +37,7 @@ export class CharData {
         jump_speed: 9,
         atk1Offset: 21,
         sk0Cd: 2,
-        sk1Cd: 300,
+        sk1Cd: 2,
         sk2Cd: 1,
         sk3Cd: 1,
     },

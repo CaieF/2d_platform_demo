@@ -16,5 +16,11 @@
       "map": "map/map3",
       "enemies": [2],
       "boss": [102]
+  },
+  {
+      "level": 4,
+      "map": "map/map00",
+      "enemies": [],
+      "boss": []
   }
 ]

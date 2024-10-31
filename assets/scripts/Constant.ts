@@ -57,6 +57,7 @@ export class Constant {
     SKILL_BAR3: 'SkillBar3', // 角色3技能栏
     SKILL_BAR4: 'SkillBar4', // 角色4技能栏
     SKILL_BAR5: 'SkillBar5', // 角色5技能栏
+    PET_CAT: 'PetCat', // 宠物猫
     BOSS1: 'Boss1', // boss1
     BOSS2: 'Boss2', // boss2
     SWORD_SPLASH: 'SwordSplash', // 剑气
@@ -81,6 +82,7 @@ export class Constant {
     PLAYER_ATTACK3: 5, // 击中就消失的攻击类型
     ENEMY:10,
     ENEMY_ATTACK1:11,
+    ENEMY_ATTACK2:12, // 击退效果的攻击
   }
 
   

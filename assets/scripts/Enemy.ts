@@ -1,4 +1,4 @@
-import { _decorator,  clamp,  Collider2D, Component, Contact2DType, dragonBones, IPhysics2DContact, lerp, Node, randomRangeInt, RigidBody2D, Vec2 } from 'cc';
+import { _decorator,  BoxCollider2D,  clamp,  Collider2D, Component, Contact2DType, dragonBones, IPhysics2DContact, lerp, math, Node, randomRangeInt, RigidBody2D, Vec2 } from 'cc';
 import { Constant } from './Constant';
 import { playIdle, playRun, playTakedamage } from './PlayAnimation';
 import { GameContext } from './GameContext';
@@ -19,10 +19,13 @@ export class Enemy extends Component {
     private _enemyStatus: number = 0; // 角色状态
     private display: dragonBones.ArmatureDisplay;
     private rb: RigidBody2D = null!;
-    private attackCollider: Collider2D = null!; // 碰撞器
+    private attack1Collider: Collider2D = null!; // 攻击类型1碰撞器
+    private attack2Collider: Collider2D = null!; // 攻击类型2碰撞器
     private HitCollider: Collider2D = null!; // 受击范围
     private randomMoveTimer: number = 0; // 随机移动计时器
     private randomMoveTime: number = 0.016; // 随机移动时间
+    private attackTimer: number = 0; // 攻击计时器
+    private attackTime: number = 0.25; // 攻击时间
     private isSpeed: boolean = false; // 是否加速
     enemyId: number = 0; // 角色id
     isBoss: boolean = false; // 是否是Boss
@@ -61,7 +64,7 @@ export class Enemy extends Component {
     }
 
     public set enemyStatus(value: number) {
-        Util.checkCollider(this.attackCollider, false);
+        Util.checkCollider(this.attack1Collider, false);
         this._enemyStatus = value;
         switch (value) {
             case Constant.CharStatus.IDLE:
@@ -94,6 +97,8 @@ export class Enemy extends Component {
     }
 
     protected onEnable(): void {
+        this.attackTimer = 0;
+        this.randomMoveTimer = 0;
         this.enemyStatus = Constant.CharStatus.IDLE;
         const colliders = this.node.getComponents(Collider2D);
         for (let collider of colliders) {
@@ -101,7 +106,9 @@ export class Enemy extends Component {
             if (collider.tag === Constant.ColliderTag.ENEMY) {
                 this.HitCollider = collider;
             } else if (collider.tag === Constant.ColliderTag.ENEMY_ATTACK1) {
-                this.attackCollider = collider;
+                this.attack1Collider = collider;
+            } else if (collider.tag === Constant.ColliderTag.ENEMY_ATTACK2) {
+                this.attack2Collider = collider;
             }
         }
         
@@ -126,13 +133,14 @@ export class Enemy extends Component {
 
     update(deltaTime: number) {
         if (this.enemyStatus === Constant.CharStatus.DEATH) {
-            Util.checkCollider(this.attackCollider, false);
+            Util.checkCollider(this.attack1Collider, false);
             return;
         }
         const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
         this.node.setPosition(x, this.node.position.y, 0);
         let lv = this.rb!.linearVelocity;
 
+        this.attackTimer += deltaTime;
         this.randomMoveTimer += deltaTime;
         if (this.randomMoveTimer > this.randomMoveTime) {
             this.randomMoveTimer = 0;
@@ -147,7 +155,7 @@ export class Enemy extends Component {
             const playerPosition = Util.getPlayerPosition();
             const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
             
-            if (distanceToPlayer < this.chaseDistance) {
+            if (distanceToPlayer < this.chaseDistance && this.attackTimer >= this.attackTime) {
                 if (this.enemyStatus === Constant.CharStatus.IDLE) {
                     this.enemyStatus = Constant.CharStatus.RUN;
                     if(this.isBoss) GameContext.ndCamera.getComponent(Camera).shake(); // 震动
@@ -164,7 +172,7 @@ export class Enemy extends Component {
                         this.node.setScale(1, 1)
                     }
                 } // 在攻击范围内
-                if (distanceToPlayer < this.attackRange) {
+                if (distanceToPlayer < this.attackRange && this.attackTimer >= this.attackTime) {
                     this.enemyStatus = Constant.CharStatus.ATTACK;
                     if (!this.isBoss) {
                         lv.x = 0;
@@ -287,20 +295,20 @@ export class Enemy extends Component {
     playAttack() {
         
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
-        // this.attack = randomRangeInt(1, this.attackNumber + 1);
-        this.attack = 1;
+        this.attack = randomRangeInt(1, this.attackNumber + 1);
+        // this.attack = 2;
         display.armatureName = `Attack${this.attack}`;
         display.playAnimation(`Attack${this.attack}`, 1);
         if (this.isBoss === false) {
             switch (this.enemyId) {
                     case CharData.EnemysId.Enemy1:
-                    this.updateAttackCollider(0.65, 22.5, 0.8);
+                    this.updateAttackCollider(this.attack1Collider, 0.65, 22.5, 0.8);
                     break;
                     case CharData.EnemysId.Enemy2:
-                    this.updateAttackCollider(0.2, 1.2);
+                    this.updateAttackCollider(this.attack1Collider, 0.2, 1.2);
                     break;
                     case CharData.EnemysId.Enemy3:
-                    this.updateAttackCollider(0.3, 14, 0.55);
+                    this.updateAttackCollider(this.attack1Collider, 0.3, 14, 0.55);
                     break;
                 default:
                     break;
@@ -310,36 +318,13 @@ export class Enemy extends Component {
         if (this.isBoss === true) {
             switch (this.enemyId) {
                 case CharData.EnemysId.Boss1:
-                    // boos1相关技能
-                    switch (this.attack) {
-                        case 1:
-                            this.isSpeed = true;
-                            this.updateSpeed(this.speed * 0.9);
-                            this.updateAttackCollider(0, 0, null, -60);
-                            GameContext.ndCamera.getComponent(Camera).shake(); // 震动
-                            break;
-                        case 2:
-                            this.node.setPosition(this.node.position.x, this.node.position.y + 50);
-                            this.updateAttackCollider(0.5, 10, 1, -60);
-                            break;
-                        case 3:
-                            this.updateAttackCollider(0.4, 25, 0.6, -30);
-                            break;
-                    }
+                    this.Boss1UseSkill(this.attack);
                     break;
                 case CharData.EnemysId.Boss2:
-                    // boss2相关技能
-                    switch (this.attack) {
-                        case 1:
-                            this.updateAttackCollider(0.5, 24.5, null, -18.1);
-                            break;
-                        case 2:
-                            break;
-                        case 3:
-                            break;
+                    this.Boss2UseSkill(this.attack);
+                    break;
                 default:
                     break;
-                }
             }
             
         }
@@ -347,10 +332,12 @@ export class Enemy extends Component {
 
         const onComplete = () => {
             // if (this.isBoss) return;
+            this.attackTimer = 0;
+
             this.isSpeed = false;
             // this.updateSpeed(this.speed);
             if (this.hp > 0) this.enemyStatus = Constant.CharStatus.IDLE;
-            this.attackCollider.enabled = false;
+            this.attack1Collider.enabled = false;
             
             display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
         }
@@ -359,28 +346,6 @@ export class Enemy extends Component {
 
     }
 
-    // 更新攻击范围随左右移动的变化
-    updateColliderPosition =(collider: Collider2D, offsetX: number, offsetY?: number) => {
-        if (offsetY) {
-            collider.offset.y = offsetY;
-        }
-        collider.offset.x = this.node.scale.x * offsetX;
-        collider.node.worldPosition = this.node.worldPosition;
-    }
-
-    // 攻击范围显示
-    private updateAttackCollider(time1: number, offsetx:number,time2?: number, offsety?: number) {
-        const callback = this.scheduleOnce(() => {
-            this.updateColliderPosition(this.attackCollider, offsetx, offsety? offsety : null);
-            this.attackCollider.enabled = true;
-        }, time1);
-        if (time2) {
-            this.scheduleOnce(() => {
-                Util.checkCollider(this.attackCollider, false);
-                this.unschedule(callback);
-            }, time2);
-        }
-    }
 
     // 受击状态
     playTakedamage() {
@@ -422,6 +387,71 @@ export class Enemy extends Component {
         this.rb.linearVelocity = this.rb.linearVelocity.normalize().multiply(new Vec2(newSpeed, newSpeed));
     }
     
+    // boss1相关技能
+    private Boss1UseSkill (attack: number) {
+        switch (attack) {
+            case 1:
+                this.isSpeed = true;
+                this.updateSpeed(this.speed * 0.9);
+                this.updateAttackCollider(this.attack1Collider, 0, 0, null, -60);
+                GameContext.ndCamera.getComponent(Camera).shake(); // 震动
+                break;
+            case 2:
+                this.node.setPosition(this.node.position.x, this.node.position.y + 50);
+                this.updateAttackCollider(this.attack1Collider, 0.5, 10, 1, -60);
+                break;
+            case 3:
+                this.updateAttackCollider(this.attack1Collider, 0.4, 25, 0.6, -30);
+                break;
+        }
+    }
+    private Boss2UseSkill (attack: number) {
+        switch (attack) {
+            case 1:
+                this.updateAttackCollider(this.attack1Collider, 0.5, 24.5, null, -18.1);
+                // this.updateAttackColliderSize(this.attackCollider, 100, 50)
+                break;
+            case 2:
+                this.node.setPosition(this.node.position.x, this.node.position.y + 50);
+                this.updateAttackCollider(this.attack2Collider, 0.2, 10, 0.3, -27);
+                break;
+            case 3:
+                this.updateAttackCollider(this.attack2Collider, 0.2, 11.2, 0.4, -4);
+                break;
+        }
+    }
+    
+    // 更新攻击范围随左右移动的变化
+    updateColliderPosition =(collider: Collider2D, offsetX: number, offsetY?: number) => {
+        if (offsetY) {
+            collider.offset.y = offsetY;
+        }
+        collider.offset.x = this.node.scale.x * offsetX;
+        collider.node.worldPosition = this.node.worldPosition;
+    }
+
+    // 攻击范围显示
+    private updateAttackCollider(collider: Collider2D, time1: number, offsetx:number,time2?: number, offsety?: number) {
+        const callback = this.scheduleOnce(() => {
+            // this.updateColliderPosition(this.attack1Collider, offsetx, offsety? offsety : null);
+            // this.attack1Collider.enabled = true;
+            this.updateColliderPosition(collider, offsetx, offsety? offsety : null);
+            collider.enabled = true;
+        }, time1);
+        if (time2) {
+            this.scheduleOnce(() => {
+                // Util.checkCollider(this.attack1Collider, false);
+                Util.checkCollider(collider, false);
+                this.unschedule(callback);
+            }, time2);
+        }
+    }
+
+    // 攻击范围大小改变
+    private updateAttackColliderSize(collider: BoxCollider2D, width: number, height: number) {
+        collider.size = new math.Size(width, height);
+    }
+
 }
 
 

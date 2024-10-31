@@ -152,4 +152,10 @@ export class UseSkill{
     ndRedExplosion.scale = (new Vec3(scale, scale, 0));
     ndRedExplosion.getComponent(Explosion).playRedExplosion();
   }
+
+  // 召唤宠物猫
+  static summonCat(position: Vec3) {
+    const ndPetCat = Globals.getNode(Constant.PrefabUrl.PET_CAT, GameContext.ndPlayerParents);
+    ndPetCat.worldPosition = position;
+  }
 }

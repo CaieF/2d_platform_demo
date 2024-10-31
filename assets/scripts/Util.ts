@@ -3,13 +3,14 @@ import { Constant } from "./Constant";
 import { Globals } from "./Globals";
 import { GameContext } from "./GameContext";
 import { CharData } from "./CharData";
+import { Enemy } from "./Enemy";
 
 export class Util {
   
   // 给墙体添加碰撞组件
   static setWall(Map: TiledMap) {
     // Map.getComponent(UITransform).setAnchorPoint(0,0); // 设置锚点
-    PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
+    // PhysicsSystem2D.instance.debugDrawFlags = EPhysics2DDrawFlags.All;
     
     // 获取地图墙体
     let tiledSize:Size = Map.getTileSize(); // 得到每一小块的大小
@@ -115,6 +116,22 @@ export class Util {
         const distance = Vec3.distance(node.worldPosition, enemy.worldPosition); // 计算距离
         return distance < Range; // 检查是否在吸引力范围内
     });
+  }
+
+  // 获取距离最近的敌人
+  static getClosestEnemy(node: Node, Range: number): Node {
+    const nearEnemies = this.getNearbyEnemies(node, Range);
+    if (nearEnemies.length === 0) return null;
+    let closestEnemy = null;
+    let closestDistance = Infinity;
+    for (const enemy of nearEnemies) {
+      const distance = Vec3.distance(node.worldPosition, enemy.worldPosition);
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestEnemy = enemy; // 假设每个敌人都有 Enemy 组件
+        }
+    }
+    return closestEnemy;
   }
 
   // 获取玩家位置

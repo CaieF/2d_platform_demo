@@ -146,7 +146,7 @@ export class Game extends Component {
     private _spawnEnemy() {
         const selectedLevel = GameContext.levels[GameContext.selectedLevelId];
         if (!selectedLevel) return;
-        const minX = -230;
+        const minX = -130;
         const maxX = 90;
         const Y = 50;
         const createOne = (enemyId: number) => {
@@ -202,7 +202,7 @@ export class Game extends Component {
         
         // 刷新小怪
         if (selectedLevel.enemies.length > 0) {
-            const numberOfEnemies = 0; // 小怪数量
+            const numberOfEnemies = 3; // 小怪数量
             for (let i = 0; i < numberOfEnemies; i++) {
                 const randomEnemyId = selectedLevel.enemies[randomRangeInt(0, selectedLevel.enemies.length)];
                 createOne(randomEnemyId);

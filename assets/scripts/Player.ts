@@ -360,13 +360,18 @@ export class Player extends Component {
     playSkill2() {
         this.display.armatureName = 'Attack4';
         this.display.playAnimation('Attack4', 1);
-        this.node.setPosition(this.node.position.x, this.node.position.y + 20);
-        this.scheduleOnce(() => {
-            Util.checkCollider(this.attack2Collider, true);
-        }, 0.3)
-        this.scheduleOnce(() => {
-            Util.checkCollider(this.attack2Collider, false);
-        }, 0.5)
+        if (this._playerId === CharData.PlayersId.Player5) {
+            UseSkill.summonCat(this.ndSkillStart.worldPosition);
+        } else {
+            this.node.setPosition(this.node.position.x, this.node.position.y + 20);
+            this.scheduleOnce(() => {
+                Util.checkCollider(this.attack2Collider, true);
+            }, 0.3)
+            this.scheduleOnce(() => {
+                Util.checkCollider(this.attack2Collider, false);
+            }, 0.5)
+        }
+        
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
             this.playerStatus = Constant.CharStatus.IDLE;
@@ -432,6 +437,14 @@ export class Player extends Component {
                         // Util.moveNode(this.node, 1, 0.0001);
                     }
                     break;
+                case Constant.ColliderTag.ENEMY_ATTACK2:
+                    if (this.playerStatus !== Constant.CharStatus.DEATH && this.playerStatus !== Constant.CharStatus.DODGE) {
+                        const scaleX = other.node.scale.x; // 获取怪物缩放的X值
+                        const direction = scaleX > 0 ? 1 : -1; // 击退方向
+                        Util.applyKnockback(10000, this.rb!, new Vec2(direction, -1));
+                        this.hurt(10);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -439,15 +452,6 @@ export class Player extends Component {
     }
 
     onEndContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
-        if (other.group === Constant.ColliderGroup.ENEMY && self.tag == Constant.ColliderTag.PLAYER) {
-            switch(other.tag) {
-                case Constant.ColliderTag.ENEMY_ATTACK1:
-                    this.playerStatus = Constant.CharStatus.IDLE;
-                    break;
-                default:
-                    break
-            }
-        }
     }
 
     // 获取下一极所需经验
@@ -473,7 +477,6 @@ export class Player extends Component {
     // 受伤
     hurt (damage: number) {
         this.hp -= damage;
-        
         
         Util.showText( `${damage}`, '#DC143C' ,this.node.worldPosition, GameContext.ndTextParent);
 
