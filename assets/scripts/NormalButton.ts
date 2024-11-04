@@ -52,6 +52,7 @@ export class NormalButton extends Component {
         if (!this.isActivated) return;
         // AudioManager.Instance.playSound('sounds/drop', 1);
         this.node.setScale(0.95, 0.95);
+        
     }
 
     onMouseUp() {

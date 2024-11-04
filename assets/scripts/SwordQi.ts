@@ -9,7 +9,6 @@ export class SwordQi extends Component {
     speed: number = 5;
     isMoveLeft: boolean = false;
     isMoving: boolean = true;
-
     private _distance: number = 0;
 
     protected onEnable(): void {

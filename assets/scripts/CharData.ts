@@ -1,4 +1,4 @@
-import { random } from "cc";
+import { random, resources } from "cc";
 import { Constant } from "./Constant";
 
 export class CharData {
@@ -59,7 +59,7 @@ export class CharData {
         skillBarUrl: Constant.PrefabUrl.SKILL_BAR4,
         hp: 120,
         speed: 11,
-        jump_speed: 32,
+        jump_speed: 10,
         sk0Cd: 1,
         sk1Cd: 1,
         sk2Cd: 1,
@@ -96,7 +96,7 @@ export class CharData {
         prefabUrl: Constant.PrefabUrl.SKELETON,  // 预制体
         enemyId: 1, // 怪物id
         name: '骷髅怪',  // 怪物名称
-        hp: 100,  // 血量
+        hp: 10,  // 血量
         minSpeed: 8,  // 移动速度
         maxSpeed: 12, // 移动速度
         chaseDistance: 200,  // 追击距离
@@ -111,7 +111,7 @@ export class CharData {
         prefabUrl: Constant.PrefabUrl.SKELETON2,
         enemyId: 2,
         name: '黑骷髅怪',
-        hp: 150,
+        hp: 15,
         minSpeed: 8,
         maxSpeed: 12,
         chaseDistance: 300,
@@ -126,7 +126,7 @@ export class CharData {
         prefabUrl: Constant.PrefabUrl.SKELETON3,
         enemyId: 3,
         name: '绿骷髅',
-        hp: 120,
+        hp: 12,
         minSpeed: 14,
         maxSpeed: 16,
         chaseDistance: 300,
@@ -166,6 +166,109 @@ export class CharData {
         attackNumber: 3,
         isBoss: true,
         HitColliderOffsetX: 0
+    }
+  }
+
+  static readonly PetsId = {
+    Pet1: 0,
+    Pet2: 1,
+    Pet3: 2,
+    Pet4: 3,
+    Pet101: 101,
+  }
+
+  // 宠物类型
+  static readonly PetType = {
+    Attack: 1,  // 攻击型
+    Cure: 2,     // 治疗型
+    Defence: 3,    // 防御型
+    Summon: 4,    // 召唤型
+  }
+
+  static readonly petConfig = {
+    [this.PetsId.Pet1]: {
+        prefabUrl: Constant.PrefabUrl.PET1,
+        avatarUrl: Constant.PrefabUrl.PET1_AVATAR,
+        petId: 0,
+        name: '挽豆射手',
+        hp: 500,
+        speed: 8,
+        ap: 2,
+        chaseDistance: 300,  // 追击距离
+        attackRange: 200,  // 攻击距离
+        petType: '攻击型',
+        type: this.PetType.Attack,
+        DragonAssetPath: 'Ani/Pet/pet1/peashooter_ske',
+        DragonAtlasAssetPath: 'Ani/Pet/pet1/peashooter_t',
+        lv: 1, // 等级
+        attackTime: 1, // 攻击间隔
+    },
+    [this.PetsId.Pet2]: {
+        prefabUrl: Constant.PrefabUrl.PET2,
+        avatarUrl: Constant.PrefabUrl.PET2_AVATAR,
+        petId: 1,
+        name: '龙日葵',
+        hp: 5000,
+        speed: 8,
+        ap: 0,
+        chaseDistance: 0,  // 追击距离
+        attackRange: 0,
+        petType: '治疗型',
+        type: this.PetType.Cure,
+        DragonAssetPath: 'Ani/Pet/pet2/sunflower_ske',
+        DragonAtlasAssetPath: 'Ani/Pet/pet2/sunflower_t',
+        lv: 1, // 等级
+        attackTime: 5, // 攻击间隔
+    },
+    [this.PetsId.Pet3]: {
+        prefabUrl: Constant.PrefabUrl.PET3,
+        avatarUrl: Constant.PrefabUrl.PET3_AVATAR,
+        petId: 2,
+        name: '强坚果',
+        hp: 2000,
+        speed: 8,
+        ap: 100,
+        chaseDistance: 500,  // 追击距离
+        attackRange: 10,
+        petType: '防御型',
+        type: this.PetType.Defence,
+        DragonAssetPath: 'Ani/Pet/pet3/nut_ske',
+        DragonAtlasAssetPath: 'Ani/Pet/pet3/nut_t',
+        lv: 1, // 等级
+        attackTime: 0, // 攻击间隔
+    },
+    [this.PetsId.Pet4]: {
+        prefabUrl: Constant.PrefabUrl.PET4,
+        avatarUrl: Constant.PrefabUrl.PET4_AVATAR,
+        petId: 3,
+        name: '曾哥',
+        hp: 1000,
+        speed: 15,
+        ap: 50,
+        chaseDistance: 200,  // 追击距离
+        attackRange: 50,
+        petType: '攻击型',
+        type: this.PetType.Attack,
+        DragonAssetPath: 'Ani/Pet/pet4/gloomshroom_ske',
+        DragonAtlasAssetPath: 'Ani/Pet/pet4/gloomshroom_t',
+        lv: 1, // 等级
+        attackTime: 0.35, // 攻击间隔
+    },
+    [this.PetsId.Pet101]: {
+      prefabUrl: Constant.PrefabUrl.PET_CAT,
+      petId: 101,
+      name: '小小喵',
+      hp: 100,
+      speed: 7,
+      ap: 50,
+      chaseDistance: 400,  // 追击距离
+      attackRange: 15,
+      petType: '召唤型',
+      type: this.PetType.Summon,
+      // DragonAssetPath: 'Ani/Pet/cat_ske',
+      // DragonAtlasAssetPath: 'Ani/Pet/cat_t',
+      lv: 1, // 等级
+      attackTime: 0.35, // 攻击间隔
     }
   }
 }

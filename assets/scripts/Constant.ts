@@ -19,7 +19,8 @@ export class Constant {
     WALL: 1 << 2,
     ENEMY: 1 << 3,
     PLAYER_ATTACK: 1 << 4,
-    ENEMY_ATTACK: 1 << 5
+    ENEMY_ATTACK: 1 << 5,
+    ITEM: 1 << 6
   }
 
 
@@ -47,8 +48,8 @@ export class Constant {
     PLAYER2_AVATAR: 'Player2Avatar', // 角色2头像
     PLAYER3_AVATAR: 'Player3Avatar', // 角色3头像
     PLAYER4_AVATAR: 'Player4Avatar', // 角色4头像
-    PLAYER5_AVATAR: 'Player5Avatar', // 角色4头像
-    PLAYER1_SKILL1: 'Player1Skill1', // 角色1技能1
+    PLAYER5_AVATAR: 'Player5Avatar', // 角色5头像
+    // PLAYER1_SKILL1: 'Player1Skill1', // 角色1技能1
     PLAYER2_SKILL0: 'Player2Skill0', // 角色2技能0
     PLAYER3_SKILL0: 'Player3Skill0', // 角色3技能0
     PLAYER3_SKILL1: 'Player3Skill1', // 角色3技能1
@@ -69,9 +70,21 @@ export class Constant {
     WATER_BALL: 'WaterBall', // 水球
     ROCK: 'Rock', // 岩石
     RED_EXPLOSION: 'RedExplosion', // 红色爆炸
+    PEA: 'pea', // 豌豆
+    PEA_EXPLOSION: 'peaExplosion', // 豌豆爆炸
+    SUN: 'sun', // 太阳
+
     SKELETON: 'Skeleton', // 骷髅
     SKELETON2: 'Skeleton2', // 骷髅2 
     SKELETON3: 'Skeleton3', // 骷髅3
+    PET1: 'Pet1', // 宠物1
+    PET2: 'Pet2', // 宠物2
+    PET3: 'Pet3', // 宠物3
+    PET4: 'Pet4', // 宠物4
+    PET1_AVATAR: 'Pet1Avatar', // 角色1头像
+    PET2_AVATAR: 'Pet2Avatar', // 角色2头像
+    PET3_AVATAR: 'Pet3Avatar', // 角色3头像
+    PET4_AVATAR: 'Pet4Avatar', // 角色4头像
   }
 
   static readonly ColliderTag = {
@@ -83,6 +96,7 @@ export class Constant {
     ENEMY:10,
     ENEMY_ATTACK1:11,
     ENEMY_ATTACK2:12, // 击退效果的攻击
+    ITEM_CURE: 21, // 恢复
   }
 
   

@@ -9,6 +9,7 @@ import { Explosion } from './Explosion';
 import { UseSkill } from './UseSkill';
 import { CharData } from './CharData';
 import { Camera } from './Camera';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')
@@ -26,6 +27,10 @@ export class Enemy extends Component {
     private randomMoveTime: number = 0.016; // 随机移动时间
     private attackTimer: number = 0; // 攻击计时器
     private attackTime: number = 0.25; // 攻击时间
+    private runTimer: number = 0; // 移动计时器
+    private runTime: number = 0.35; // 移动时间
+    private shakeTimer: number = 0; // 震动计时器
+    private shakeTime: number = 0.8; // 震动时间
     private isSpeed: boolean = false; // 是否加速
     enemyId: number = 0; // 角色id
     isBoss: boolean = false; // 是否是Boss
@@ -142,9 +147,19 @@ export class Enemy extends Component {
 
         this.attackTimer += deltaTime;
         this.randomMoveTimer += deltaTime;
+        this.runTimer += deltaTime;
+        this.shakeTimer += deltaTime;
         if (this.randomMoveTimer > this.randomMoveTime) {
             this.randomMoveTimer = 0;
             lv.x = (Math.random() * 2 - 1) / 10;
+        }
+        if (this.runTimer >= this.runTime && this.isBoss && this.enemyStatus === Constant.CharStatus.RUN) {
+            this.runTimer = 0;
+            AudioManager.Instance.playSound('BossSkillSounds/bong', 0.6)
+        }
+        if (this.shakeTimer >= this.shakeTime && this.isBoss && this.enemyStatus === Constant.CharStatus.RUN) {
+            this.shakeTimer = 0;
+            GameContext.ndCamera.getComponent(Camera).shake(); // 震动 
         }
 
         if (this.enemyStatus !== Constant.CharStatus.DEATH 
@@ -152,21 +167,27 @@ export class Enemy extends Component {
             && this.enemyStatus !== Constant.CharStatus.TAKEDAMAGE 
             && this.hp > 0) {
         
-            const playerPosition = Util.getPlayerPosition();
-            const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
+            const chaseNode = Util.getClosestPlayerOrPet(this.node, this.chaseDistance);  // 获取最近的玩家或宠物
+
+            // const playerPosition = Util.getPlayerPosition();
+            // const distanceToPlayer = Vec2.distance(chaseNode.worldPosition, this.node.worldPosition);
+            let distanceToPlayer = Infinity
+            if (chaseNode) {
+                distanceToPlayer = Math.abs(chaseNode.worldPosition.x - this.node.worldPosition.x); 
+            } 
+             // 距离
             
-            if (distanceToPlayer < this.chaseDistance && this.attackTimer >= this.attackTime) {
+            if (chaseNode && this.attackTimer >= this.attackTime) {
                 if (this.enemyStatus === Constant.CharStatus.IDLE) {
                     this.enemyStatus = Constant.CharStatus.RUN;
-                    if(this.isBoss) GameContext.ndCamera.getComponent(Camera).shake(); // 震动
                 }
-                // 玩家在敌人左边
+                
                 if (this.enemyStatus === Constant.CharStatus.RUN) {
-                    if (playerPosition.x < this.node.worldPosition.x) {
+                    if (chaseNode.worldPosition.x < this.node.worldPosition.x) { // 追击目标在敌人左边
                         this.HitCollider.offset.x = this.HitColliderOffsetX;
                         lv.x = - this.speed / 2;
                         this.node.setScale(-1, 1)
-                    } else { // 玩家在敌人右边
+                    } else { // 追击目标在敌人右边
                         this.HitCollider.offset.x = -this.HitColliderOffsetX;
                         lv.x = this.speed / 2;
                         this.node.setScale(1, 1)
@@ -180,7 +201,11 @@ export class Enemy extends Component {
                 }
             
             } else { // 在追击范围外
-                if (this.enemyStatus === Constant.CharStatus.RUN) this.enemyStatus = Constant.CharStatus.IDLE;
+                if (this.enemyStatus === Constant.CharStatus.RUN) {
+                    this.enemyStatus = Constant.CharStatus.IDLE;
+                    if (this.isBoss) console.log('boss技能停止了');
+                    
+                }
                 this.randomMoveTimer += deltaTime;
                 if (this.randomMoveTimer > this.randomMoveTime) {
                     this.randomMoveTimer = 0;
@@ -208,7 +233,7 @@ export class Enemy extends Component {
                         if (this.enemyStatus !== Constant.CharStatus.DEATH) {
                             const scaleX = this.node.scale.x; // 获取敌人缩放的X值
                             const direction = scaleX > 0 ? -1 : 1;
-                            Util.applyKnockback(this.isBoss? 10000:1000, this.rb!, new Vec2(direction, 0));
+                            Util.applyKnockback(this.isBoss? 10000:3000, this.rb!, new Vec2(direction, 0));
                             this.hurt(1);
                         }
                         break;
@@ -218,7 +243,7 @@ export class Enemy extends Component {
                                 this.hurt(3);
                             } else {
                                 other.node.getComponent(Arrow).isHit = true;
-                                this.hurt(100);
+                                this.hurt(4);
                             }
                             break;
                         }
@@ -248,11 +273,7 @@ export class Enemy extends Component {
                             setTimeout(() => {
                                 UseSkill.shootThunderStrike(self.node.worldPosition);
                             }, 0)
-                        } else if(other.node.getComponent(Arrow).isFireBall === true) {
-                            setTimeout(() => {
-                                UseSkill.redExplosion(self.node.worldPosition, 1);
-                            }, 0)
-                        }
+                        } 
                     }
                     break;
                 default:
@@ -275,6 +296,11 @@ export class Enemy extends Component {
     playDeath() {
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         if (!display) return;
+        if (this.enemyId !== CharData.EnemysId.Boss1) {
+            AudioManager.Instance.playSound('CharSounds/skeletonHit', 0.4)
+        } else {
+            AudioManager.Instance.playSound('CharSounds/BossGrilDeath')
+        }
         display.armatureName = 'Death';
         display.playAnimation('Death', 1);
 
@@ -352,6 +378,9 @@ export class Enemy extends Component {
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         display.armatureName = 'TakeDamage';
         display.playAnimation('TakeDamage', 1);
+        if (!this.isBoss) {
+            AudioManager.Instance.playSound('CharSounds/skeletonHit', 0.4)
+        }
         const onComplete = () => {
             this.enemyStatus = Constant.CharStatus.IDLE;
             display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
@@ -392,15 +421,18 @@ export class Enemy extends Component {
         switch (attack) {
             case 1:
                 this.isSpeed = true;
+                AudioManager.Instance.playSound('BossSkillSounds/bong', 0.8)
                 this.updateSpeed(this.speed * 0.9);
                 this.updateAttackCollider(this.attack1Collider, 0, 0, null, -60);
                 GameContext.ndCamera.getComponent(Camera).shake(); // 震动
                 break;
             case 2:
+                AudioManager.Instance.playSound('BossSkillSounds/bong', 0.8)
                 this.node.setPosition(this.node.position.x, this.node.position.y + 50);
                 this.updateAttackCollider(this.attack1Collider, 0.5, 10, 1, -60);
                 break;
             case 3:
+                AudioManager.Instance.playSound('BossSkillSounds/Fist1', 0.6)
                 this.updateAttackCollider(this.attack1Collider, 0.4, 25, 0.6, -30);
                 break;
         }
@@ -408,14 +440,18 @@ export class Enemy extends Component {
     private Boss2UseSkill (attack: number) {
         switch (attack) {
             case 1:
+                AudioManager.Instance.playSound('BossSkillSounds/bong', 0.6)
                 this.updateAttackCollider(this.attack1Collider, 0.5, 24.5, null, -18.1);
                 // this.updateAttackColliderSize(this.attackCollider, 100, 50)
                 break;
             case 2:
+                AudioManager.Instance.playSound('SkillSounds/explosion', 0.8);
                 this.node.setPosition(this.node.position.x, this.node.position.y + 50);
                 this.updateAttackCollider(this.attack2Collider, 0.2, 10, 0.3, -27);
+                GameContext.ndCamera.getComponent(Camera).shake(); // 震动
                 break;
             case 3:
+                AudioManager.Instance.playSound('BossSkillSounds/Fist', 0.6)
                 this.updateAttackCollider(this.attack2Collider, 0.2, 11.2, 0.4, -4);
                 break;
         }
@@ -433,8 +469,6 @@ export class Enemy extends Component {
     // 攻击范围显示
     private updateAttackCollider(collider: Collider2D, time1: number, offsetx:number,time2?: number, offsety?: number) {
         const callback = this.scheduleOnce(() => {
-            // this.updateColliderPosition(this.attack1Collider, offsetx, offsety? offsety : null);
-            // this.attack1Collider.enabled = true;
             this.updateColliderPosition(collider, offsetx, offsety? offsety : null);
             collider.enabled = true;
         }, time1);

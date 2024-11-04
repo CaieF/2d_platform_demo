@@ -72,6 +72,14 @@ export class ButtonEvent {
           Util.applyResume();
           director.loadScene(GameContext.GameScene);
           break;
+        case 'Pet':
+          // 设置按钮 
+          if (GameContext.GameStatus === Constant.GameStatus.PAUSE) return;
+          // if (GameContext.GameScene !== Constant.GameScene.Start) {
+          //   Util.applyPause();
+          // }
+          GameContext.GameStatus = Constant.GameStatus.PAUSE;
+          ndSettingPanel.active = !ndSettingPanel.active;
         default:
           break;
       }

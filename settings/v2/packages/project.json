@@ -27,15 +27,20 @@
       {
         "index": 5,
         "name": "ENEMY_ATTACK"
+      },
+      {
+        "index": 6,
+        "name": "Item"
       }
     ],
     "collisionMatrix": {
       "0": 1,
-      "1": 44,
+      "1": 108,
       "2": 26,
       "3": 22,
       "4": 12,
-      "5": 2
+      "5": 2,
+      "6": 2
     }
   },
   "custom_joint_texture_layouts": [],

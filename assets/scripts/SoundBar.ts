@@ -86,7 +86,8 @@ export class SoundBar extends Component {
         this.ndLabel.string = '音量：  ' + (value * 100).toFixed(0) + '%';
         // GameContext.AudioSource.volume = value;
         AudioManager.Instance.musicVolume = value;
-        AudioManager.Instance.soundVolume = Math.min(value * 2, 1);
+        // AudioManager.Instance.soundVolume = Math.min(value * 2, 1);
+        AudioManager.Instance.soundVolume = value;
         if (value !== 0) GameContext.GameSound = value;
     }
 

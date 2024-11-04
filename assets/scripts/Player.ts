@@ -8,6 +8,8 @@ import { GameContext } from './GameContext';
 import { CharData } from './CharData';
 import { UseSkill } from './UseSkill';
 import { AudioManager } from './AudioManager';
+import { Globals } from './Globals';
+import { Item } from './Item';
 const axInput = AxInput.instance;
 
 @ccclass('Player')
@@ -27,6 +29,8 @@ export class Player extends Component {
     private callback: void;
     private randomMoveTimer: number = 0; // 随机移动计时器
     private randomMoveTime: number = 0.2; // 随机移动时间
+    private isSummon: boolean = false; // 是否召唤
+    private SummonId: number = -1; // 召唤角色id
     
     public get playerId(): number {
         return this._playerId;
@@ -45,11 +49,13 @@ export class Player extends Component {
     exp: number = 0; // 经验值
     maxExp: number = 100; // 最大经验值
 
-    setValue (hp: number, maxHp: number, speed: number, jump_speed: number) {
+    setValue (hp: number, maxHp: number, speed: number, jump_speed: number, isSummon=false, SummonId?: number) {
         this.hp = hp;
         this.maxHp = maxHp;
         this.speed = speed;
         this.jump_speed = jump_speed;
+        this.isSummon = isSummon;
+        if (SummonId) this.SummonId = SummonId;
     }
 
     private _onEvent: Function;
@@ -156,6 +162,9 @@ export class Player extends Component {
                 }
             }, this);
         }
+        if (this.isSummon) this.playerStatus = Constant.CharStatus.SKILL0;
+        else this.playerStatus = Constant.CharStatus.IDLE;
+        
     }
 
     protected onDisable(): void {
@@ -167,6 +176,9 @@ export class Player extends Component {
 
     start() {
         this.playerStatus = Constant.CharStatus.IDLE;
+        if (this.isSummon) {
+            this.playerStatus = Constant.CharStatus.SKILL0;
+        }
     }
 
     
@@ -177,6 +189,7 @@ export class Player extends Component {
         if (this.playerStatus == Constant.CharStatus.ATTACK) return;
         if (this.playerStatus == Constant.CharStatus.SKILL0) return;
         if (this.playerStatus == Constant.CharStatus.SKILL1) return;
+        if (this.isSummon) return;
         if (this.hp <= 0) return;
 
 
@@ -261,11 +274,13 @@ export class Player extends Component {
                 UseSkill.shootFireBall(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                 break;
             case CharData.PlayersId.Player5:
+                AudioManager.Instance.playSound('SkillSounds/sword1', 0.4)
                 this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
                     Util.checkCollider(this.attack1Collider, true);
                 break;
             default:
                 this.callback = this.scheduleOnce(() => {
+                    AudioManager.Instance.playSound('SkillSounds/sword1', 0.4)
                     this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
                     Util.checkCollider(this.attack1Collider, true);
                 }, 0.3)
@@ -288,8 +303,12 @@ export class Player extends Component {
     playSkill0() {
         this.display.armatureName = 'Attack2';
         this.display.playAnimation('Attack2', 1);
+        if (this._playerId === CharData.PlayersId.Player5 && !this.isSummon) {
+            UseSkill.shootWaterBall(this.ndSkillStart.worldPosition, this.ndAni.scale.x)
+        }
         
-        if (this._playerId === CharData.PlayersId.Player4) {
+        if (this._playerId === CharData.PlayersId.Player4 || this.SummonId === (CharData.PlayersId.Player4 + 1)) {
+            AudioManager.Instance.playSound('SkillSounds/fire', 0.6);
             this.callback = this.scheduleOnce(() => {
                 this.updateColliderPosition(this.attack1Collider, this._attack1Offset);
                 Util.checkCollider(this.attack1Collider, true);
@@ -297,26 +316,29 @@ export class Player extends Component {
         }
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
-            switch(this._playerId) {
-                case CharData.PlayersId.Player1:
-                    UseSkill.shootSwordQi(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
-                    break;
-                case CharData.PlayersId.Player2:
-                    UseSkill.throwStone(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
-                    break;
-                case CharData.PlayersId.Player3:
-                    UseSkill.shootElectorArrow(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
-                    break;
-                case CharData.PlayersId.Player4:
-                    Util.checkCollider(this.attack1Collider, false);
-                    break;
-                case CharData.PlayersId.Player5:
-                    UseSkill.shootWaterBall(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
-                    break;
-                default:
-                    break;
+            const skillMap = {
+                [CharData.PlayersId.Player1]: UseSkill.shootSwordQi,
+                [CharData.PlayersId.Player2]: UseSkill.throwStone,
+                [CharData.PlayersId.Player3]: UseSkill.shootElectorArrow,
+                // [CharData.PlayersId.Player4]: ()=> Util.checkCollider(this.attack1Collider, false),
+                // [CharData.PlayersId.Player5]: 
             }
-            this.playerStatus = Constant.CharStatus.IDLE;
+
+            const invokeSkill = (playerId: number, scale: number) => {
+                const skillFunc = skillMap[playerId];
+                if (playerId === CharData.PlayersId.Player4) {
+                    Util.checkCollider(this.attack1Collider, false)
+                } else if(playerId === CharData.PlayersId.Player5) {
+                    return;
+                } else skillFunc(this.ndSkillStart.worldPosition, scale);
+            }
+
+            if (this.isSummon && this.SummonId !== -1) {
+                invokeSkill(this.SummonId - 1, this.node.scale.x);
+            } else invokeSkill(this._playerId, this.ndAni.scale.x);
+
+            if (this.isSummon) this.node.destroy();
+            else this.playerStatus = Constant.CharStatus.IDLE;
         };
         this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
     }
@@ -330,7 +352,9 @@ export class Player extends Component {
                 UseSkill.shootThunderSplash(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
                 break;
             case CharData.PlayersId.Player4:
+                AudioManager.Instance.playSound('SkillSounds/cure', 0.6);
                 this.cure(5)
+                break;
             default:
                 break;
         }
@@ -363,6 +387,7 @@ export class Player extends Component {
         if (this._playerId === CharData.PlayersId.Player5) {
             UseSkill.summonCat(this.ndSkillStart.worldPosition);
         } else {
+            AudioManager.Instance.playSound('SkillSounds/explosion', 1);
             this.node.setPosition(this.node.position.x, this.node.position.y + 20);
             this.scheduleOnce(() => {
                 Util.checkCollider(this.attack2Collider, true);
@@ -385,6 +410,10 @@ export class Player extends Component {
         this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         this.display.armatureName = 'Dodge';
         this.display.playAnimation('Dodge', 1);
+        AudioManager.Instance.playSound('SkillSounds/roll')
+        if (this._playerId === CharData.PlayersId.Player5) {
+            UseSkill.summonPlayer(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
+        }
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
             this.playerStatus = Constant.CharStatus.IDLE;
@@ -396,7 +425,12 @@ export class Player extends Component {
 
     // 受击状态
     playTakedamage() {
-        AudioManager.Instance.playSound('sounds/hit', 1);
+        if (this.playerId === CharData.PlayersId.Player5) {
+            AudioManager.Instance.playSound('CharSounds/grilHit')
+        } else {
+            AudioManager.Instance.playSound('sounds/hit', 1);
+        }
+        
         
         this.display.armatureName = 'TakeDamage';
         this.display.playAnimation('TakeDamage', 1);
@@ -411,7 +445,12 @@ export class Player extends Component {
 
     // 死亡状态
     playDeath() {
-        AudioManager.Instance.playSound('sounds/death', 0.8);
+        if (this.playerId === CharData.PlayersId.Player5) {
+            AudioManager.Instance.playSound('CharSounds/grilDeath')
+        } else {
+            AudioManager.Instance.playSound('sounds/death', 0.8);
+        }
+        // AudioManager.Instance.playSound('sounds/death', 0.8);
         this.display.armatureName = 'Death';
         this.display.playAnimation('Death', 1); 
 
@@ -444,6 +483,15 @@ export class Player extends Component {
                         Util.applyKnockback(10000, this.rb!, new Vec2(direction, -1));
                         this.hurt(10);
                     }
+                    break;
+                default:
+                    break;
+            }
+         } else if (other.group === Constant.ColliderGroup.ITEM && self.tag == Constant.ColliderTag.PLAYER) {
+            switch(other.tag) {
+                case Constant.ColliderTag.ITEM_CURE:
+                    this.cure(5);
+                    other.node.getComponent(Item).isUsed = true;
                     break;
                 default:
                     break;

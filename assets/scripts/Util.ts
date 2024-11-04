@@ -134,6 +134,32 @@ export class Util {
     return closestEnemy;
   }
 
+  // 获取范围内的玩家和宠物
+  static getNearbyPlayersAndPets(node: Node, Range: number): Node[] {
+    const playersAndPets = GameContext.ndPlayerParents.children; // 获取所有玩家和宠物
+    return playersAndPets.filter((playerOrPet) => {
+        const distance = Vec3.distance(node.worldPosition, playerOrPet.worldPosition); // 计算距离
+        return distance < Range; // 检查是否在吸引力范围内
+    });
+  }
+
+  // 获取距离最近的玩家或宠物
+  static getClosestPlayerOrPet(node: Node, Range: number): Node {
+    const nearPlayersAndPets = this.getNearbyPlayersAndPets(node, Range);
+    if (nearPlayersAndPets.length === 0) return null;
+    let closestPlayerOrPet = null;
+    let closestDistance = Infinity;
+    for (const playerOrPet of nearPlayersAndPets) {
+      const distance = Vec3.distance(node.worldPosition, playerOrPet.worldPosition);
+      if (distance < closestDistance) {
+          closestDistance = distance;
+          closestPlayerOrPet = playerOrPet; // 假设每个玩家和宠物都有 Player 组件
+      }
+    }
+    return closestPlayerOrPet;
+  }
+
+
   // 获取玩家位置
   static getPlayerPosition() {
     if (GameContext.ndPlayer) {
@@ -154,16 +180,30 @@ export class Util {
   }
 
   // 加载角色头像
-  static loadPlayerAvatar(ndPlayerMessage: Node) {
-    const defaultPlayerId = CharData.PlayersId.Player1; // 默认角色ID
-    const selectedPlayerId = GameContext.selectedPlayerId;
-    // 获取角色配置
-    const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
-    const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
+  static loadPlayerAvatar(ndPlayerMessage: Node, isPet=false) {
+    let defaultId = CharData.PlayersId.Player1;
+    let selectId = 0;
+    let configData;
+    let avatarPrefabUrl;
+    if (isPet) {
+      selectId = GameContext.selectedPetId;
+      configData = CharData.petConfig[selectId];
+      avatarPrefabUrl = configData.avatarUrl;
+    } else {
+      selectId = GameContext.selectedPlayerId;
+      configData = CharData.playerConfig[selectId];
+      avatarPrefabUrl = configData.avatarUrl;
+    }
+    // const defaultPlayerId = CharData.PlayersId.Player1; // 默认角色ID
+    // const selectedPlayerId = GameContext.selectedPlayerId;
+    // // 获取角色配置
+    // const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
+    // const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
     // 角色头像
-    const playerAvatarNode = Globals.getNode(playerAvatarPrefabUrl, ndPlayerMessage);
-    if (playerAvatarNode) {
-        playerAvatarNode.setPosition(-30, 0);
+    // const playerAvatarNode = Globals.getNode(playerAvatarPrefabUrl, ndPlayerMessage);
+    const AvatarNode = Globals.getNode(avatarPrefabUrl, ndPlayerMessage);
+    if (AvatarNode) {
+        AvatarNode.setPosition(-30, 0);
     }
   }
 

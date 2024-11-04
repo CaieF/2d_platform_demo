@@ -1,4 +1,4 @@
-import { _decorator, Component, director, Label, Node, randomRangeInt, Slider, TiledMap, TiledMapAsset, UITransform } from 'cc';
+import { _decorator, Component, director, Label, Node, NodePool, randomRangeInt, Slider, TiledMap, TiledMapAsset, UITransform } from 'cc';
 import { Util } from './Util';
 import { GameContext } from './GameContext';
 import { Player } from './Player';
@@ -13,6 +13,7 @@ import { ButtonEvent } from './ButtonEvent';
 import { ResUtil } from './ResUtil';
 import { AudioManager } from './AudioManager';
 import { SettingPanel } from './SettingPanel';
+import { PetCat } from './PetCat';
 const { ccclass, property } = _decorator;
 
 @ccclass('Game')
@@ -24,6 +25,7 @@ export class Game extends Component {
     // @property(TiledMap) Map: TiledMap;
     @property(Node) ndPlayerMessage: Node;  // 角色信息
     @property(Node) ndBossMessage: Node;    // boss信息
+    @property(Node) ndPetMessage: Node;  // 宠物信息
     @property(Node) ndWeaponParent: Node;
     @property(Node) ndWeaponParent0: Node;
     @property(Node) ndBtnSettingButton: Node; // 设置按钮
@@ -37,6 +39,9 @@ export class Game extends Component {
     private _ndLifeBar: Node;
     private _ndExpBar: Node;
     private _ndLevel: Node;
+    private _ndPetLifeBar: Node;
+    private _ndPetExpBar: Node;
+    private _ndPetLevel: Node;
     private _ndBossLifeBar: Node;
     private _BossName: Node;
     private _BossLifeBar: ProgressBar;
@@ -65,10 +70,19 @@ export class Game extends Component {
         this._ndExpBar = this.ndPlayerMessage.getChildByName('ExpBar');
         this._ndLevel = this.ndPlayerMessage.getChildByName('Level');
 
+        // 宠物生命条 经验条 等级 宠物名字
+        this._ndPetLifeBar = this.ndPetMessage.getChildByName('LifeBar');
+        this._ndPetExpBar = this.ndPetMessage.getChildByName('ExpBar');
+        this._ndPetLevel = this.ndPetMessage.getChildByName('Level');
+
         // Boss 生命条 boss名字
         this._ndBossLifeBar = this.ndBossMessage.getChildByName('LifeBar');
         this._BossName = this.ndBossMessage.getChildByName('name');
         
+        
+        if (GameContext.selectedPetId !== -1) {
+            this._loadPet(); // 加载宠物
+        }
         this._loadPlayer(); // 加载角色
         await this.loadLevel(GameContext.selectedLevelId) // 加载地图
         this.map = this.ndLevelManager.getComponent(TiledMap); // 地图
@@ -111,6 +125,20 @@ export class Game extends Component {
         const LevelLabel = this._ndLevel.getComponent(Label);
         LevelLabel.string = `Lv: ${GameContext.player.level}`;
 
+        if (GameContext.selectedPetId !== -1) {
+            const petLifeBar = this._ndPetLifeBar.getComponent(ProgressBar);
+            petLifeBar.setProgress(GameContext.pet.hp / GameContext.pet.maxHp);
+            petLifeBar.setLabel(GameContext.pet.hp, GameContext.pet.maxHp);
+            // 经验条
+            const petExpBar = this._ndPetExpBar.getComponent(ProgressBar);
+            petExpBar.setProgress(0);
+            petExpBar.setLabel(0, GameContext.pet.maxExp);
+            // 等级
+            const petLevelLabel = this._ndPetLevel.getComponent(Label);
+            petLevelLabel.string = `Lv: ${GameContext.pet.level}`;
+        }
+        
+
         GameContext.player.onPlayerEvent((event: number, value: number) => {
             switch (event) {
                 case Player.Event.HURT:
@@ -136,6 +164,30 @@ export class Game extends Component {
                     break;
             }
         });
+
+        if (GameContext.selectedPetId !== -1) {
+            GameContext.pet.onPetEvent((event: number, value: number) => {
+                switch(event) {
+                    case PetCat.Event.HURT:
+                        const petLifeBar = this._ndPetLifeBar.getComponent(ProgressBar);
+                        petLifeBar.setProgress(GameContext.pet.hp / GameContext.pet.maxHp);
+                        petLifeBar.setLabel(GameContext.pet.hp, GameContext.pet.maxHp);
+                        break;
+                    case PetCat.Event.ADD_EXP:
+                        const petExpBar = this._ndPetExpBar.getComponent(ProgressBar);
+                        petExpBar.setProgress(GameContext.pet.exp / GameContext.pet.maxExp);
+                        petExpBar.setLabel(GameContext.pet.exp, GameContext.pet.maxExp);
+                        break;
+                    case PetCat.Event.LEVEL_UP:
+                        const petLevelLabel = this._ndPetLevel.getComponent(Label);
+                        petLevelLabel.string = `Lv: ${GameContext.pet.level}`;
+                        break;
+                    default:
+                        break;
+                }
+            })
+        }
+
     }
     async start() {
         GameContext.GameStatus = Constant.GameStatus.RUNNING;
@@ -176,6 +228,7 @@ export class Game extends Component {
                 switch (event) {
                     case Enemy.Event.DEATH:
                         GameContext.player.addExp(enemyConfigData.exp);
+                        GameContext.pet.addExp(enemyConfigData.exp);
                         break;
                     case Enemy.Event.HURT:
                         if (GameContext.player.playerId === CharData.PlayersId.Player1) {
@@ -227,7 +280,6 @@ export class Game extends Component {
         const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
 
         const playerPrefabUrl = playerConfigData.prefabUrl;
-        const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
         const SkillBarPrefabUrl = playerConfigData.skillBarUrl;
 
         const hp = playerConfigData.hp;
@@ -238,15 +290,15 @@ export class Game extends Component {
         if (playerNode) {
             GameContext.ndPlayer = playerNode;
             GameContext.player = playerNode.getComponent(Player);
-            GameContext.player.setValue(hp, hp, speed, jump_speed); // 设置属性
+            GameContext.player.setValue(hp, hp, speed, jump_speed, false); // 设置属性
         }
         Util.loadPlayerAvatar(this.ndPlayerMessage)
         // 技能栏
         const skillBarNode = Globals.getNode(SkillBarPrefabUrl, this.ndPlayerMessage);
         
         if (skillBarNode) {
-            skillBarNode.setScale(0.5, 0.5);
-            skillBarNode.setPosition(-10, -270)
+            skillBarNode.setScale(0.625, 0.625);
+            skillBarNode.setPosition(-20, -330)
             const skillButtons = skillBarNode.getComponentsInChildren(SkillButton);
             this._sk0Button = skillButtons[0];
             this._sk1Button = skillButtons[1];
@@ -254,6 +306,25 @@ export class Game extends Component {
             this._sk3Button = skillButtons[3];
         }
     }
+
+    // 加载宠物
+    private _loadPet() {
+        if (GameContext.selectedPetId === -1) return;
+
+        const petConfig = CharData.petConfig[GameContext.selectedPetId];
+        const petPrefabUrl = petConfig.prefabUrl;
+        const petNode = Globals.getNode(petPrefabUrl, GameContext.ndPlayerParents);
+        if (petNode) {
+            GameContext.ndPet = petNode;
+            GameContext.pet = petNode.getComponent(PetCat);
+            // const pet = petNode.getComponent(PetCat);
+            GameContext.pet.setValue(petConfig.petId, petConfig.hp, petConfig.ap, petConfig.speed, petConfig.type, petConfig.chaseDistance, petConfig.attackRange, petConfig.attackTime);
+        }
+        this.ndPetMessage.active = true;
+        Util.loadPlayerAvatar(this.ndPetMessage, true);
+
+    }
+
     protected update(dt: number): void {
         
     }

@@ -27,6 +27,11 @@ export class Explosion extends Component {
         Globals.putNode(this.node);
     }
 
+    playPeaExplosion() {
+        const dis = this.node.getComponent(dragonBones.ArmatureDisplay);
+        dis.playAnimation('pea', 1);
+    }
+
     playRedExplosion() {
         const dis = this.node.getComponent(dragonBones.ArmatureDisplay);
         dis.playAnimation('RedExplosion', 1);
