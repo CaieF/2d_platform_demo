@@ -164,8 +164,9 @@ export class PetCat extends Component {
 
         // 获取玩家一定范围内的最近敌人
         let chaseEnemy: Node = Util.getClosestEnemy(this.node, this.chaseDistance)
-        // 敌人存在追击敌人（治疗性宠物不进行追击）
-        if (chaseEnemy && this.attackTimer >= this.attackTime && this.petType !== CharData.PetType.Cure) { 
+        // 敌人存在追击敌人（治疗性和增益型宠物不进行追击）
+        if (chaseEnemy && this.attackTimer >= this.attackTime 
+        && this.petType !== CharData.PetType.Cure && this.petType !== CharData.PetType.Help) { 
             // console.log(chaseEnemy);
             const enemyPosition = chaseEnemy.worldPosition;  // 敌人位置
             const distanceToEnemy = Math.abs(enemyPosition.x - this.node.worldPosition.x); // 距离
@@ -259,6 +260,8 @@ export class PetCat extends Component {
 
     // 增加经验
     addExp(exp: number) {
+        if (this.hp <= 0) return;
+
         this.exp += exp;
         this._onEvent && this._onEvent.apply(this._target, [PetCat.Event.ADD_EXP, exp]);
 

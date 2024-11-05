@@ -34,6 +34,7 @@ export class Game extends Component {
     @property(Node) ndLoadingPanel: Node; // 加载面板
     @property(Node) ndWinPanel: Node; // 胜利面板
     @property(Node) ndCamera: Node;
+    @property(Label) GameMoneyLabel: Label; // 准备页面的金钱标签
     map: TiledMap;
 
     private _ndLifeBar: Node;
@@ -64,6 +65,7 @@ export class Game extends Component {
         GameContext.ndWeaponParent = this.ndWeaponParent;
         GameContext.ndWeaponParent0 = this.ndWeaponParent0;
         
+        GameContext.gameMoneyLabel = this.GameMoneyLabel;
 
         // 生命条 经验条 等级
         this._ndLifeBar = this.ndPlayerMessage.getChildByName('LifeBar');
@@ -99,7 +101,10 @@ export class Game extends Component {
     }
 
     protected async onEnable() {
-        
+        GameContext.GameScene = Constant.GameScene.Prepare;
+        Util.changeMoney();
+        // let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
+        // this.GameMoneyLabel.string = price;
         
         GameContext.GameScene = Constant.GameScene.Game;
         AudioManager.Instance.playMusic('sounds/Game', 1);
@@ -228,7 +233,8 @@ export class Game extends Component {
                 switch (event) {
                     case Enemy.Event.DEATH:
                         GameContext.player.addExp(enemyConfigData.exp);
-                        GameContext.pet.addExp(enemyConfigData.exp);
+                        if (GameContext.selectedPetId !== -1) GameContext.pet.addExp(enemyConfigData.exp);
+                        Util.changeMoney(enemyConfigData.exp);
                         break;
                     case Enemy.Event.HURT:
                         if (GameContext.player.playerId === CharData.PlayersId.Player1) {

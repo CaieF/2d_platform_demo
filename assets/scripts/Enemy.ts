@@ -10,6 +10,7 @@ import { UseSkill } from './UseSkill';
 import { CharData } from './CharData';
 import { Camera } from './Camera';
 import { AudioManager } from './AudioManager';
+import { Player } from './Player';
 const { ccclass, property } = _decorator;
 
 @ccclass('Enemy')

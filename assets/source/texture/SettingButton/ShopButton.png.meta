@@ -2,7 +2,7 @@
   "ver": "1.0.27",
   "importer": "image",
   "imported": true,
-  "uuid": "47131d96-3756-45c7-8d2e-b66244a0f9bd",
+  "uuid": "2e562d49-d97a-4e99-886c-c644a725c0f4",
   "files": [
     ".json",
     ".png"
@@ -10,14 +10,14 @@
   "subMetas": {
     "6c48a": {
       "importer": "texture",
-      "uuid": "47131d96-3756-45c7-8d2e-b66244a0f9bd@6c48a",
-      "displayName": "DiaglogBar",
+      "uuid": "2e562d49-d97a-4e99-886c-c644a725c0f4@6c48a",
+      "displayName": "ShopButton",
       "id": "6c48a",
       "name": "texture",
       "userData": {
         "wrapModeS": "clamp-to-edge",
         "wrapModeT": "clamp-to-edge",
-        "imageUuidOrDatabaseUri": "47131d96-3756-45c7-8d2e-b66244a0f9bd",
+        "imageUuidOrDatabaseUri": "2e562d49-d97a-4e99-886c-c644a725c0f4",
         "isUuid": true,
         "visible": false,
         "minfilter": "nearest",
@@ -34,8 +34,8 @@
     },
     "f9941": {
       "importer": "sprite-frame",
-      "uuid": "47131d96-3756-45c7-8d2e-b66244a0f9bd@f9941",
-      "displayName": "DiaglogBar",
+      "uuid": "2e562d49-d97a-4e99-886c-c644a725c0f4@f9941",
+      "displayName": "ShopButton",
       "id": "f9941",
       "name": "spriteFrame",
       "userData": {
@@ -46,10 +46,10 @@
         "offsetY": 0,
         "trimX": 0,
         "trimY": 0,
-        "width": 64,
-        "height": 20,
-        "rawWidth": 64,
-        "rawHeight": 20,
+        "width": 16,
+        "height": 16,
+        "rawWidth": 16,
+        "rawHeight": 16,
         "borderTop": 0,
         "borderBottom": 0,
         "borderLeft": 0,
@@ -61,17 +61,17 @@
         "meshType": 0,
         "vertices": {
           "rawPosition": [
-            -32,
-            -10,
+            -8,
+            -8,
             0,
-            32,
-            -10,
+            8,
+            -8,
             0,
-            -32,
-            10,
+            -8,
+            8,
             0,
-            32,
-            10,
+            8,
+            8,
             0
           ],
           "indexes": [
@@ -84,12 +84,12 @@
           ],
           "uv": [
             0,
-            20,
-            64,
-            20,
+            16,
+            16,
+            16,
             0,
             0,
-            64,
+            16,
             0
           ],
           "nuv": [
@@ -103,18 +103,18 @@
             1
           ],
           "minPos": [
-            -32,
-            -10,
+            -8,
+            -8,
             0
           ],
           "maxPos": [
-            32,
-            10,
+            8,
+            8,
             0
           ]
         },
         "isUuid": true,
-        "imageUuidOrDatabaseUri": "47131d96-3756-45c7-8d2e-b66244a0f9bd@6c48a",
+        "imageUuidOrDatabaseUri": "2e562d49-d97a-4e99-886c-c644a725c0f4@6c48a",
         "atlasUuid": ""
       },
       "ver": "1.0.12",
@@ -129,6 +129,6 @@
     "type": "sprite-frame",
     "hasAlpha": true,
     "fixAlphaTransparencyArtifacts": false,
-    "redirect": "47131d96-3756-45c7-8d2e-b66244a0f9bd@6c48a"
+    "redirect": "2e562d49-d97a-4e99-886c-c644a725c0f4@6c48a"
   }
 }

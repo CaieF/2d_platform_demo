@@ -81,10 +81,12 @@ export class Constant {
     PET2: 'Pet2', // 宠物2
     PET3: 'Pet3', // 宠物3
     PET4: 'Pet4', // 宠物4
+    PET5: 'Pet5', // 宠物5
     PET1_AVATAR: 'Pet1Avatar', // 角色1头像
     PET2_AVATAR: 'Pet2Avatar', // 角色2头像
     PET3_AVATAR: 'Pet3Avatar', // 角色3头像
     PET4_AVATAR: 'Pet4Avatar', // 角色4头像
+    PET5_AVATAR: 'Pet5Avatar', // 角色5头像
   }
 
   static readonly ColliderTag = {

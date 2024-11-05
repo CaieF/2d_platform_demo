@@ -96,7 +96,7 @@ export class CharData {
         prefabUrl: Constant.PrefabUrl.SKELETON,  // 预制体
         enemyId: 1, // 怪物id
         name: '骷髅怪',  // 怪物名称
-        hp: 10,  // 血量
+        hp: 2,  // 血量
         minSpeed: 8,  // 移动速度
         maxSpeed: 12, // 移动速度
         chaseDistance: 200,  // 追击距离
@@ -174,6 +174,8 @@ export class CharData {
     Pet2: 1,
     Pet3: 2,
     Pet4: 3,
+    Pet5: 4,
+
     Pet101: 101,
   }
 
@@ -183,6 +185,7 @@ export class CharData {
     Cure: 2,     // 治疗型
     Defence: 3,    // 防御型
     Summon: 4,    // 召唤型
+    Help: 5,    // 增益型
   }
 
   static readonly petConfig = {
@@ -254,6 +257,23 @@ export class CharData {
         lv: 1, // 等级
         attackTime: 0.35, // 攻击间隔
     },
+    [this.PetsId.Pet5]: {
+        prefabUrl: Constant.PrefabUrl.PET5,
+        avatarUrl: Constant.PrefabUrl.PET5_AVATAR,
+        petId: 4,
+        name: '原批',
+        hp: 100,
+        speed: 7,
+        ap: 0,
+        chaseDistance: 0,  // 追击距离
+        attackRange: 0,
+        petType: '增益型',
+        type: this.PetType.Help,
+        DragonAssetPath: 'Ani/Pet/pet5/op_ske',
+        DragonAtlasAssetPath: 'Ani/Pet/pet5/op_t',
+        lv: 1, // 
+        attackTime: null, // 攻击间隔
+     },
     [this.PetsId.Pet101]: {
       prefabUrl: Constant.PrefabUrl.PET_CAT,
       petId: 101,
@@ -269,6 +289,26 @@ export class CharData {
       // DragonAtlasAssetPath: 'Ani/Pet/cat_t',
       lv: 1, // 等级
       attackTime: 0.35, // 攻击间隔
+    }
+  }
+
+  static readonly GoodsId = {
+    Good1: 0,
+    Good2: 1,
+  }
+
+  static readonly GoodsConfig = {
+    [this.GoodsId.Good1]: {
+      goodId: 0,
+      name: '角色恢复药水',
+      effect: '恢复角色一定血量',
+      price: 200,
+    },
+    [this.GoodsId.Good2]: {
+      goodId: 1,
+      name: '宠物恢复药水',
+      effect: '恢复宠物一定血量',
+      price: 100,
     }
   }
 }

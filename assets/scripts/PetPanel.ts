@@ -66,6 +66,7 @@ export class PetPanel extends Component {
 
     async clickItems(event: Event, index: string) {
         const ind = parseInt(index) - 1;
+        AudioManager.Instance.playSound('sounds/drop')
         if (this.currentIndex === ind) {
             return;
         }
@@ -87,9 +88,6 @@ export class PetPanel extends Component {
         }).catch((err) => {
             console.log(err);
         });
-        // await resources.load(petData.DragonAtlasAssetPath, (err, res: JsonAsset) => {
-        //     display.dragonAtlasAsset = res;
-        // })
         await ResUtil.loadJson(petData.DragonAtlasAssetPath).then((res) => {
             display.dragonAtlasAsset = res;
         }).catch((err) => {

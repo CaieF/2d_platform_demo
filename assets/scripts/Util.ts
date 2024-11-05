@@ -207,5 +207,10 @@ export class Util {
     }
   }
 
-  
+  static changeMoney(money: number=0) {
+    GameContext.Money += money;
+    let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
+    if (GameContext.prepareMoneyLabel) GameContext.prepareMoneyLabel.string = price;
+    if (GameContext.gameMoneyLabel) GameContext.gameMoneyLabel.string = price;
+  }
 }

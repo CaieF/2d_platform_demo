@@ -1,4 +1,4 @@
-import { _decorator, Component, director, Node } from 'cc';
+import { _decorator, Component, director, Label, Node } from 'cc';
 import { Util } from './Util';
 import { ButtonEvent } from './ButtonEvent';
 import { GameContext } from './GameContext';
@@ -12,18 +12,29 @@ const { ccclass, property } = _decorator;
 export class Prepare extends Component {
     @property(Node) ndPlayerMessage: Node;
     @property(Node) ndBtnSettingButton: Node; // 设置按钮
+    @property(Node) ndBtnShopButton: Node; // 商店按钮
     @property(Node) ndBtnBack: Node; // 返回按钮
     @property(Node) ndSettingPanel: Node; // 设置面板
+    @property(Node) ndShopPanel: Node; // 商店面板
     @property(Node) ndLevelPanel: Node; // 关卡选择
     @property(Node) ndBtnStartGame: Node; // 开始按钮
     @property(Node) ndPetButton: Node; // 宠物选择按钮
     @property(Node) ndPetPanel: Node; // 宠物选择面板
+    @property(Label) prepareMoneyLabel: Label; // 准备页面的金钱标签
+
+    protected onLoad(): void {
+        GameContext.prepareMoneyLabel = this.prepareMoneyLabel;
+    }
 
     protected onEnable(): void {
         GameContext.GameScene = Constant.GameScene.Prepare;
+        Util.changeMoney();
+        // let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
+        // this.prepareMoneyLabel.string = price;
 
         ButtonEvent.setButtonEvent(this.ndBtnSettingButton, 'Setting', this.ndSettingPanel); // 设置按钮点击事件
-        ButtonEvent.setButtonKeyEvent(this.ndBtnSettingButton, 'Setting', this.ndSettingPanel)
+        ButtonEvent.setButtonKeyEvent(this.ndBtnSettingButton, 'Setting', this.ndSettingPanel); // 商店按钮点击事件
+        ButtonEvent.setButtonEvent(this.ndBtnShopButton, 'Pet', this.ndShopPanel); // 商店按钮点击事件
         ButtonEvent.setButtonEvent(this.ndBtnBack, 'Back'); // 返回按钮点击事件
         ButtonEvent.setButtonEvent(this.ndPetButton, 'Pet', this.ndPetPanel); // 宠物选择按钮点击事件
     }

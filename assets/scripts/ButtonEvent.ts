@@ -80,6 +80,7 @@ export class ButtonEvent {
           // }
           GameContext.GameStatus = Constant.GameStatus.PAUSE;
           ndSettingPanel.active = !ndSettingPanel.active;
+          break;
         default:
           break;
       }

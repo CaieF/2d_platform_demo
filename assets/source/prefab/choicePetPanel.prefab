@@ -377,7 +377,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 56.15377034888601,
+      "width": 56.15337048276406,
       "height": 41.800000000000004
     },
     "_anchorPoint": {
@@ -416,7 +416,7 @@
     "_string": "宠 物",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 33.5390625,
+    "_actualFontSize": 33.609375,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -1216,7 +1216,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -35.835,
-      "y": -10,
+      "y": -5,
       "z": 0
     },
     "_lrot": {
@@ -1256,7 +1256,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 50.50511006289308,
+      "width": 50.51217093793584,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -1295,7 +1295,7 @@
     "_string": "挽豆射手",
     "_horizontalAlign": 0,
     "_verticalAlign": 0,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -1451,7 +1451,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -35.835,
-      "y": -35.2,
+      "y": -30.2,
       "z": 0
     },
     "_lrot": {
@@ -1491,7 +1491,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 36.826642754192875,
+      "width": 36.83179698396095,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -1530,7 +1530,7 @@
     "_string": "龙日葵",
     "_horizontalAlign": 0,
     "_verticalAlign": 0,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -1686,7 +1686,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -35.835,
-      "y": -60.400000000000006,
+      "y": -55.4,
       "z": 0
     },
     "_lrot": {
@@ -1726,7 +1726,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 37.878832547169814,
+      "width": 37.88412820345188,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -1765,7 +1765,7 @@
     "_string": "强坚果",
     "_horizontalAlign": 0,
     "_verticalAlign": 0,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -1921,7 +1921,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -35.835,
-      "y": -85.60000000000001,
+      "y": -80.6,
       "z": 0
     },
     "_lrot": {
@@ -1961,7 +1961,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 25.25255503144654,
+      "width": 25.25608546896792,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -2000,7 +2000,7 @@
     "_string": "曾哥",
     "_horizontalAlign": 0,
     "_verticalAlign": 0,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -2138,7 +2138,7 @@
       "__id__": 36
     },
     "_children": [],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 82
@@ -2156,7 +2156,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -35.835,
-      "y": -70.48,
+      "y": -105.8,
       "z": 0
     },
     "_lrot": {
@@ -2196,8 +2196,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 31.99107065027894,
-      "height": 20.16
+      "width": 25.25608546896792,
+      "height": 25.2
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2232,17 +2232,20 @@
       "b": 0,
       "a": 255
     },
-    "_string": "派梦",
+    "_string": "原批",
     "_horizontalAlign": 0,
     "_verticalAlign": 0,
-    "_actualFontSize": 17.925,
-    "_fontSize": 16,
+    "_actualFontSize": 22.40625,
+    "_fontSize": 20,
     "_fontFamily": "Arial",
-    "_lineHeight": 16,
+    "_lineHeight": 20,
     "_overflow": 0,
     "_enableWrapText": true,
-    "_font": null,
-    "_isSystemFontUsed": true,
+    "_font": {
+      "__uuid__": "dddda381-2777-432c-ae4f-2e8100dfc988",
+      "__expectedType__": "cc.TTFFont"
+    },
+    "_isSystemFontUsed": false,
     "_spacingX": 0,
     "_isItalic": false,
     "_isBold": false,
@@ -2643,8 +2646,8 @@
     "_startAxis": 0,
     "_paddingLeft": 0,
     "_paddingRight": 0,
-    "_paddingTop": 10,
-    "_paddingBottom": 0,
+    "_paddingTop": 5,
+    "_paddingBottom": 5,
     "_spacingX": 0,
     "_spacingY": 0,
     "_verticalDirection": 1,
@@ -2790,8 +2793,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 54.50511006289308,
-      "height": 29.2
+      "width": 54.51217093793584,
+      "height": 29.199999999999996
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2829,7 +2832,7 @@
     "_string": "宠物列表",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -3098,7 +3101,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 63.131387578616355,
+      "width": 63.140213672419804,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -3137,7 +3140,7 @@
     "_string": "请选择宠物",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -3393,7 +3396,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 26.30474482442348,
+      "width": 26.308389448221757,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -3432,7 +3435,7 @@
     "_string": "lv: 0",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -3615,7 +3618,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 53.6616794418239,
+      "width": 53.66916459640864,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -3654,7 +3657,7 @@
     "_string": "生命值: 0",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -3777,7 +3780,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 53.6616794418239,
+      "width": 53.66916459640864,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -3816,7 +3819,7 @@
     "_string": "攻击力: 0",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -3939,7 +3942,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 41.03540192610063,
+      "width": 41.04112186192469,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -3978,7 +3981,7 @@
     "_string": "速度: 0",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -4101,7 +4104,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 66.28795695754717,
+      "width": 66.2972073308926,
       "height": 25.2
     },
     "_anchorPoint": {
@@ -4140,7 +4143,7 @@
     "_string": "宠物类型: 0",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 22.359375,
+    "_actualFontSize": 22.40625,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -4433,8 +4436,8 @@
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 48.2004607791754,
-      "height": 48.1
+      "width": 48.209461079149236,
+      "height": 48.099999999999994
     }
   },
   {
@@ -4724,8 +4727,8 @@
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 48.2004607791754,
-      "height": 48.1
+      "width": 48.209461079149236,
+      "height": 48.099999999999994
     }
   },
   {

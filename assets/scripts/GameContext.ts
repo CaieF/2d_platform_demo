@@ -1,4 +1,4 @@
-import { Node } from "cc";
+import { Label, Node } from "cc";
 import { Player } from "./Player";
 import { Enemy } from "./Enemy";
 import { PetCat } from "./PetCat";
@@ -24,7 +24,10 @@ export class GameContext {
   static boss: Enemy;
   static ndWeaponParent: Node;
   static ndWeaponParent0: Node;
+  static prepareMoneyLabel: Label;
+  static gameMoneyLabel: Label;
   static levels: any[] = [];
   static isSound: boolean = true; // 是否开启声音
+  static Money: number = 1000; // 游戏金币
   // static playerConfigData: Object;
 }

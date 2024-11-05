@@ -509,6 +509,7 @@ export class Player extends Component {
 
     // 增加经验
     addExp(exp: number) {
+        if (this.hp <= 0) return;
         this.exp += exp;
         this._onEvent && this._onEvent.apply(this._target, [Player.Event.ADD_EXP, exp]);
 
@@ -550,6 +551,7 @@ export class Player extends Component {
 
     // 恢复HP
     cure (cureValue: number) {
+        if (this.hp <= 0) return;
         this.hp += cureValue;
         Util.showText( `${cureValue}`, '#7FFF00' ,this.node.worldPosition, GameContext.ndTextParent);
         if (this.hp > this.maxHp) {
