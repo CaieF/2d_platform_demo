@@ -4,6 +4,7 @@ import { Globals } from "./Globals";
 import { GameContext } from "./GameContext";
 import { CharData } from "./CharData";
 import { Enemy } from "./Enemy";
+import { StorageManager } from "./StorageManager";
 
 export class Util {
   
@@ -194,13 +195,6 @@ export class Util {
       configData = CharData.playerConfig[selectId];
       avatarPrefabUrl = configData.avatarUrl;
     }
-    // const defaultPlayerId = CharData.PlayersId.Player1; // 默认角色ID
-    // const selectedPlayerId = GameContext.selectedPlayerId;
-    // // 获取角色配置
-    // const playerConfigData  = CharData.playerConfig[selectedPlayerId] || CharData.playerConfig[defaultPlayerId];
-    // const playerAvatarPrefabUrl = playerConfigData.avatarUrl;
-    // 角色头像
-    // const playerAvatarNode = Globals.getNode(playerAvatarPrefabUrl, ndPlayerMessage);
     const AvatarNode = Globals.getNode(avatarPrefabUrl, ndPlayerMessage);
     if (AvatarNode) {
         AvatarNode.setPosition(-30, 0);
@@ -208,7 +202,15 @@ export class Util {
   }
 
   static changeMoney(money: number=0) {
-    GameContext.Money += money;
+    // console.log(money);
+    // GameContext.Money = StorageManager.get('Money') || 1000;
+    if (money !== 0) {
+      GameContext.Money += money;
+      StorageManager.save('Money', GameContext.Money);
+    }
+    
+    console.log(GameContext.Money);
+    
     let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
     if (GameContext.prepareMoneyLabel) GameContext.prepareMoneyLabel.string = price;
     if (GameContext.gameMoneyLabel) GameContext.gameMoneyLabel.string = price;

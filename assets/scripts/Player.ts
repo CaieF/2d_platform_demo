@@ -10,6 +10,7 @@ import { UseSkill } from './UseSkill';
 import { AudioManager } from './AudioManager';
 import { Globals } from './Globals';
 import { Item } from './Item';
+import { StorageManager } from './StorageManager';
 const axInput = AxInput.instance;
 
 @ccclass('Player')
@@ -49,11 +50,14 @@ export class Player extends Component {
     exp: number = 0; // 经验值
     maxExp: number = 100; // 最大经验值
 
-    setValue (hp: number, maxHp: number, speed: number, jump_speed: number, isSummon=false, SummonId?: number) {
-        this.hp = hp;
-        this.maxHp = maxHp;
+    setValue (hp: number, maxHp: number, speed: number, jump_speed: number, level: number, isSummon=false, SummonId?: number) {
+        this.level = level;
+        this.hp = hp + (level - 1) * 5;
+        this.maxHp = maxHp + (level - 1) * 5;
         this.speed = speed;
         this.jump_speed = jump_speed;
+        this.exp = GameContext.playerLevel[this.playerId].exp;
+        this.maxExp = this._getNextLevelExp(this.level);
         this.isSummon = isSummon;
         if (SummonId) this.SummonId = SummonId;
     }
@@ -207,9 +211,9 @@ export class Player extends Component {
         }
 
         // 翻滚
-        if (this.playerStatus == Constant.CharStatus.DODGE) {
-            if (this.ndAni.scale.x < 0) lv.x -= this.speed * deltaTime;
-            else lv.x += this.speed * deltaTime;
+        if (this.playerStatus == Constant.CharStatus.DODGE && this.playerId !== CharData.PlayersId.Player5) {
+            if (this.ndAni.scale.x < 0) lv.x = -this.speed;
+            else lv.x = this.speed;
         }
 
         // 按下按钮
@@ -260,6 +264,13 @@ export class Player extends Component {
         this._target = target;
     }
 
+    onComplete() {
+        this.display.removeEventListener(dragonBones.EventObject.COMPLETE, this.onComplete, this);
+        if (this.hp <=0) return;
+        this.unschedule(this.callback);
+        this.playerStatus = Constant.CharStatus.IDLE;
+    }
+
     // 攻击状态
     playAttack() {
         this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
@@ -290,13 +301,7 @@ export class Player extends Component {
                 break;
         }
 
-        
-        const onComplete = () => {
-            this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
-            this.unschedule(this.callback);
-            this.playerStatus = Constant.CharStatus.IDLE;
-        };
-        this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
+        this.display.addEventListener(dragonBones.EventObject.COMPLETE, this.onComplete, this);
     }
 
     // 释放技能0
@@ -320,8 +325,6 @@ export class Player extends Component {
                 [CharData.PlayersId.Player1]: UseSkill.shootSwordQi,
                 [CharData.PlayersId.Player2]: UseSkill.throwStone,
                 [CharData.PlayersId.Player3]: UseSkill.shootElectorArrow,
-                // [CharData.PlayersId.Player4]: ()=> Util.checkCollider(this.attack1Collider, false),
-                // [CharData.PlayersId.Player5]: 
             }
 
             const invokeSkill = (playerId: number, scale: number) => {
@@ -361,6 +364,7 @@ export class Player extends Component {
 
         const onComplete = () => {
             this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
+            if (this.hp <=0) return;
             switch(this._playerId) {
                 case CharData.PlayersId.Player1:
                     UseSkill.shootSwordGroup(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
@@ -396,13 +400,8 @@ export class Player extends Component {
                 Util.checkCollider(this.attack2Collider, false);
             }, 0.5)
         }
-        
-        const onComplete = () => {
-            this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
-            this.playerStatus = Constant.CharStatus.IDLE;
-        }
 
-        this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
+        this.display.addEventListener(dragonBones.EventObject.COMPLETE, this.onComplete, this);
     }
 
     // 翻滚状态
@@ -414,14 +413,9 @@ export class Player extends Component {
         if (this._playerId === CharData.PlayersId.Player5) {
             UseSkill.summonPlayer(this.ndSkillStart.worldPosition, this.ndAni.scale.x);
         }
-        const onComplete = () => {
-            this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
-            this.playerStatus = Constant.CharStatus.IDLE;
-        }
 
-        this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
+        this.display.addEventListener(dragonBones.EventObject.COMPLETE, this.onComplete, this);
     }
-
 
     // 受击状态
     playTakedamage() {
@@ -430,17 +424,11 @@ export class Player extends Component {
         } else {
             AudioManager.Instance.playSound('sounds/hit', 1);
         }
-        
-        
+                
         this.display.armatureName = 'TakeDamage';
         this.display.playAnimation('TakeDamage', 1);
 
-
-        const onComplete = () => {
-            this.display.removeEventListener(dragonBones.EventObject.COMPLETE, onComplete,this);
-            this.playerStatus = Constant.CharStatus.IDLE;
-        };
-        this.display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
+        this.display.addEventListener(dragonBones.EventObject.COMPLETE, this.onComplete, this);
     }
 
     // 死亡状态
@@ -473,7 +461,6 @@ export class Player extends Component {
                 case Constant.ColliderTag.ENEMY_ATTACK1:
                     if (this.playerStatus !== Constant.CharStatus.DEATH && this.playerStatus !== Constant.CharStatus.DODGE) {
                         this.hurt(10);
-                        // Util.moveNode(this.node, 1, 0.0001);
                     }
                     break;
                 case Constant.ColliderTag.ENEMY_ATTACK2:
@@ -490,7 +477,13 @@ export class Player extends Component {
          } else if (other.group === Constant.ColliderGroup.ITEM && self.tag == Constant.ColliderTag.PLAYER) {
             switch(other.tag) {
                 case Constant.ColliderTag.ITEM_CURE:
+                    AudioManager.Instance.playSound('SkillSounds/cure', 0.6);
                     this.cure(5);
+                    other.node.getComponent(Item).isUsed = true;
+                    break;
+                case Constant.ColliderTag.ITEM_COIN:
+                    AudioManager.Instance.playSound('ItemSounds/eatCoin', 0.9);
+                    Util.changeMoney(10);
                     other.node.getComponent(Item).isUsed = true;
                     break;
                 default:
@@ -511,14 +504,20 @@ export class Player extends Component {
     addExp(exp: number) {
         if (this.hp <= 0) return;
         this.exp += exp;
+        GameContext.playerLevel[this.playerId].exp = this.exp;
         this._onEvent && this._onEvent.apply(this._target, [Player.Event.ADD_EXP, exp]);
 
         if (this.exp >= this.maxExp) {
             this.exp -= this.maxExp;
             this.level += 1;
+            GameContext.playerLevel[this.playerId].exp = this.exp;
+            GameContext.playerLevel[this.playerId].level = this.level;
+            this.maxHp += 5;
+            this.hp = this.maxHp;
             this.maxExp = this._getNextLevelExp(this.level);
             this._onEvent && this._onEvent.apply(this._target, [Player.Event.LEVEL_UP, -1]);
         }
+        StorageManager.save('playerLevel', GameContext.playerLevel);
     }
 
     

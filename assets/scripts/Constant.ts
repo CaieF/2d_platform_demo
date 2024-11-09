@@ -73,7 +73,7 @@ export class Constant {
     PEA: 'pea', // 豌豆
     PEA_EXPLOSION: 'peaExplosion', // 豌豆爆炸
     SUN: 'sun', // 太阳
-
+    COIN: 'coin', // 金币
     SKELETON: 'Skeleton', // 骷髅
     SKELETON2: 'Skeleton2', // 骷髅2 
     SKELETON3: 'Skeleton3', // 骷髅3
@@ -99,6 +99,7 @@ export class Constant {
     ENEMY_ATTACK1:11,
     ENEMY_ATTACK2:12, // 击退效果的攻击
     ITEM_CURE: 21, // 恢复
+    ITEM_COIN: 22, // 金币
   }
 
   

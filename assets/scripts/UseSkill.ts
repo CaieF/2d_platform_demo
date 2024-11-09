@@ -223,4 +223,11 @@ export class UseSkill{
     // ndSun.scale = (new Vec3(scaleX * 2, scaleX * 2, 0));
   }
 
+  // 死亡掉落金币
+  static dropCoin(position: Vec3) {
+    const ndCoin = Globals.getNode(Constant.PrefabUrl.COIN, GameContext.ndWeaponParent);
+    ndCoin.worldPosition = position;
+    ndCoin.getComponent(Item).existTime = 10;
+    ndCoin.getComponent(Item).isUsed = false;
+  }
 }

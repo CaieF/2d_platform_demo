@@ -2,6 +2,8 @@ import { Label, Node } from "cc";
 import { Player } from "./Player";
 import { Enemy } from "./Enemy";
 import { PetCat } from "./PetCat";
+import { CharData } from "./CharData";
+import { StorageManager } from "./StorageManager";
 
 export class GameContext {
   static GameStatus: number = 0; // 游戏状态
@@ -28,6 +30,18 @@ export class GameContext {
   static gameMoneyLabel: Label;
   static levels: any[] = [];
   static isSound: boolean = true; // 是否开启声音
-  static Money: number = 1000; // 游戏金币
+  static Money: number = parseInt(StorageManager.get('Money')) || 1000; // 游戏金币
+  static Goods:object = StorageManager.get('Goods') || { // 游戏道具
+    [CharData.GoodsId.Good1]: 0, // 红色补血药
+    [CharData.GoodsId.Good2]: 0, // 蓝色补血药
+  };
+  // 游戏等级
+  static playerLevel: object =  StorageManager.get('playerLevel') || {
+    [CharData.PlayersId.Player1]: {level: 1, exp: 1},
+    [CharData.PlayersId.Player2]: {level: 1, exp: 0},
+    [CharData.PlayersId.Player3]: {level: 1, exp: 0},
+    [CharData.PlayersId.Player4]: {level: 1, exp: 0},
+    [CharData.PlayersId.Player5]: {level: 1, exp: 0},
+  }; 
   // static playerConfigData: Object;
 }

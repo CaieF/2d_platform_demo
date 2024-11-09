@@ -14,6 +14,7 @@ import { ResUtil } from './ResUtil';
 import { AudioManager } from './AudioManager';
 import { SettingPanel } from './SettingPanel';
 import { PetCat } from './PetCat';
+import { StorageManager } from './StorageManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Game')
@@ -35,6 +36,7 @@ export class Game extends Component {
     @property(Node) ndWinPanel: Node; // 胜利面板
     @property(Node) ndCamera: Node;
     @property(Label) GameMoneyLabel: Label; // 准备页面的金钱标签
+    @property(Node) ItemList: Node; // 物品列表
     map: TiledMap;
 
     private _ndLifeBar: Node;
@@ -103,8 +105,6 @@ export class Game extends Component {
     protected async onEnable() {
         GameContext.GameScene = Constant.GameScene.Prepare;
         Util.changeMoney();
-        // let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
-        // this.GameMoneyLabel.string = price;
         
         GameContext.GameScene = Constant.GameScene.Game;
         AudioManager.Instance.playMusic('sounds/Game', 1);
@@ -124,8 +124,8 @@ export class Game extends Component {
         lifeBar.setLabel(GameContext.player.hp, GameContext.player.maxHp);
         // 经验条
         const expBar = this._ndExpBar.getComponent(ProgressBar);
-        expBar.setProgress(0);
-        expBar.setLabel(0, GameContext.player.maxExp);
+        expBar.setProgress(GameContext.player.exp / GameContext.player.maxExp);
+        expBar.setLabel(GameContext.player.exp, GameContext.player.maxExp);
         // 等级
         const LevelLabel = this._ndLevel.getComponent(Label);
         LevelLabel.string = `Lv: ${GameContext.player.level}`;
@@ -161,6 +161,8 @@ export class Game extends Component {
                     expBar.setLabel(GameContext.player.exp, GameContext.player.maxExp);
                     break;
                 case Player.Event.LEVEL_UP:
+                    lifeBar.setProgress(GameContext.player.hp / GameContext.player.maxHp);
+                    lifeBar.setLabel(GameContext.player.hp, GameContext.player.maxHp);
                     expBar.setProgress(GameContext.player.exp / GameContext.player.maxExp);
                     expBar.setLabel(GameContext.player.exp, GameContext.player.maxExp);
                     LevelLabel.string = `Lv: ${GameContext.player.level}`;
@@ -191,6 +193,58 @@ export class Game extends Component {
                         break;
                 }
             })
+        }
+
+        if (this.ItemList) {
+            for (let i = 0; i < this.ItemList.children.length; i++) {
+                const item = this.ItemList.children[i];
+                const itemNums = item.getChildByName('nums');
+                const itemNumsLabel = itemNums.getComponent(Label);
+                itemNumsLabel.string = `${GameContext.Goods[i]}`;
+                const itemSkBtn = item.getComponent(SkillButton);
+                itemSkBtn.isSkill = false;
+                itemSkBtn.ItemId = i;
+                if (GameContext.Goods[i] <= 0) {
+                    itemSkBtn.isAvaliable = false;
+                };
+                if (GameContext.selectedPetId === -1 && i === 1) {
+                    itemSkBtn.isAvaliable = false;
+                }
+                switch (i) {
+                    case CharData.GoodsId.Good1: {
+                        itemSkBtn.onKeyQ(() => {
+                            this.useLotion(itemSkBtn, itemNumsLabel, i)
+                        })
+                        break;
+                    }
+                    case CharData.GoodsId.Good2: {
+                        if (GameContext.selectedPetId === -1) return;
+                        itemSkBtn.onKeyE(() => {
+                            this.useLotion(itemSkBtn, itemNumsLabel, i)
+                        })
+                        break;
+                    }
+                }
+                itemSkBtn.onClick(() => {
+                    this.useLotion(itemSkBtn, itemNumsLabel, i)
+                })
+            }
+        }
+    }
+
+    useLotion(itemSkBtn: SkillButton, nums: Label, id: number) {
+        if (id === 0) {
+            AudioManager.Instance.playSound('SkillSounds/cure', 0.6);
+            GameContext.player.cure(50);
+        } else if (id === 1) {
+            if (GameContext.selectedPetId === -1) return;
+            GameContext.pet.cure(10);
+        }
+        GameContext.Goods[id] -= 1;
+        nums.string = `${GameContext.Goods[id]}`;
+        StorageManager.save('Goods', GameContext.Goods);
+        if (GameContext.Goods[id] <= 0) {
+            itemSkBtn.isAvaliable = false;
         }
 
     }
@@ -234,7 +288,8 @@ export class Game extends Component {
                     case Enemy.Event.DEATH:
                         GameContext.player.addExp(enemyConfigData.exp);
                         if (GameContext.selectedPetId !== -1) GameContext.pet.addExp(enemyConfigData.exp);
-                        Util.changeMoney(enemyConfigData.exp);
+                        
+                        // Util.changeMoney(enemyConfigData.exp);
                         break;
                     case Enemy.Event.HURT:
                         if (GameContext.player.playerId === CharData.PlayersId.Player1) {
@@ -296,7 +351,8 @@ export class Game extends Component {
         if (playerNode) {
             GameContext.ndPlayer = playerNode;
             GameContext.player = playerNode.getComponent(Player);
-            GameContext.player.setValue(hp, hp, speed, jump_speed, false); // 设置属性
+            GameContext.player.setValue(hp, hp, speed, jump_speed, 
+            GameContext.playerLevel[GameContext.selectedPlayerId].level, false); // 设置属性
         }
         Util.loadPlayerAvatar(this.ndPlayerMessage)
         // 技能栏

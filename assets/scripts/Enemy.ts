@@ -32,7 +32,6 @@ export class Enemy extends Component {
     private runTime: number = 0.35; // 移动时间
     private shakeTimer: number = 0; // 震动计时器
     private shakeTime: number = 0.8; // 震动时间
-    private isSpeed: boolean = false; // 是否加速
     enemyId: number = 0; // 角色id
     isBoss: boolean = false; // 是否是Boss
     speed: number = 10;
@@ -94,8 +93,6 @@ export class Enemy extends Component {
     }
 
     protected onLoad() {
-        // this.speed = 10;
-        
         if (this.ndAni) {
             this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         }
@@ -106,6 +103,7 @@ export class Enemy extends Component {
         this.attackTimer = 0;
         this.randomMoveTimer = 0;
         this.enemyStatus = Constant.CharStatus.IDLE;
+        this.hp = this.maxHp;
         const colliders = this.node.getComponents(Collider2D);
         for (let collider of colliders) {
             
@@ -170,8 +168,6 @@ export class Enemy extends Component {
         
             const chaseNode = Util.getClosestPlayerOrPet(this.node, this.chaseDistance);  // 获取最近的玩家或宠物
 
-            // const playerPosition = Util.getPlayerPosition();
-            // const distanceToPlayer = Vec2.distance(chaseNode.worldPosition, this.node.worldPosition);
             let distanceToPlayer = Infinity
             if (chaseNode) {
                 distanceToPlayer = Math.abs(chaseNode.worldPosition.x - this.node.worldPosition.x); 
@@ -204,8 +200,6 @@ export class Enemy extends Component {
             } else { // 在追击范围外
                 if (this.enemyStatus === Constant.CharStatus.RUN) {
                     this.enemyStatus = Constant.CharStatus.IDLE;
-                    if (this.isBoss) console.log('boss技能停止了');
-                    
                 }
                 this.randomMoveTimer += deltaTime;
                 if (this.randomMoveTimer > this.randomMoveTime) {
@@ -292,8 +286,6 @@ export class Enemy extends Component {
         }
     }
 
-    
-    
     playDeath() {
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         if (!display) return;
@@ -310,6 +302,7 @@ export class Enemy extends Component {
                     this._cb && this._cb.apply(this._target, [Enemy.Event.WIN])
                 }
                 if (this.hp <= 0) {
+                    UseSkill.dropCoin(this.node.worldPosition);
                     Globals.putNode(this.node);
                 }
             
@@ -320,7 +313,6 @@ export class Enemy extends Component {
     }
 
     playAttack() {
-        
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         this.attack = randomRangeInt(1, this.attackNumber + 1);
         // this.attack = 2;
@@ -358,14 +350,9 @@ export class Enemy extends Component {
         // this.attackCollider.enabled = false;
 
         const onComplete = () => {
-            // if (this.isBoss) return;
             this.attackTimer = 0;
-
-            this.isSpeed = false;
-            // this.updateSpeed(this.speed);
             if (this.hp > 0) this.enemyStatus = Constant.CharStatus.IDLE;
             this.attack1Collider.enabled = false;
-            
             display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
         }
         
@@ -389,7 +376,6 @@ export class Enemy extends Component {
         display.addEventListener(dragonBones.EventObject.COMPLETE, onComplete, this);
     }
 
-
     // 受伤
     hurt (damage: number) {
         this.hp -= damage;
@@ -397,6 +383,7 @@ export class Enemy extends Component {
         this._cb && this._cb.apply(this._target, [Enemy.Event.HURT, damage]);
         
         if (this.hp <= 0) {
+            this.hp = 0;
             this._cb && this._cb.apply(this._target, [Enemy.Event.DEATH])
             this.enemyStatus = Constant.CharStatus.DEATH;
         }
@@ -421,7 +408,6 @@ export class Enemy extends Component {
     private Boss1UseSkill (attack: number) {
         switch (attack) {
             case 1:
-                this.isSpeed = true;
                 AudioManager.Instance.playSound('BossSkillSounds/bong', 0.8)
                 this.updateSpeed(this.speed * 0.9);
                 this.updateAttackCollider(this.attack1Collider, 0, 0, null, -60);

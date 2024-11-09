@@ -6,6 +6,7 @@ import { GameContext } from './GameContext';
 import { Globals } from './Globals';
 import { CharData } from './CharData';
 import { UseSkill } from './UseSkill';
+import { AudioManager } from './AudioManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('PetCat')
@@ -126,10 +127,6 @@ export class PetCat extends Component {
             } else if (collider.group === Constant.ColliderGroup.PLAYER_ATTACK) {
                 this.AttackCollider = collider;
             }
-            // console.log(this.AttackCollider);
-            console.log(this.HitCollider);
-            
-            
         }
 
         // 添加碰撞事件
@@ -376,6 +373,18 @@ export class PetCat extends Component {
         }
         collider.offset.x = this.node.scale.x * offsetX;
         collider.node.worldPosition = this.node.worldPosition;
+    }
+
+    // 恢复HP
+    cure (cureValue: number) {
+        if (this.hp <= 0) return;
+        AudioManager.Instance.playSound('SkillSounds/cure', 0.6);
+        this.hp += cureValue;
+        Util.showText( `${cureValue}`, '#7FFF00' ,this.node.worldPosition, GameContext.ndTextParent);
+        if (this.hp > this.maxHp) {
+            this.hp = this.maxHp;
+        }
+        this._onEvent && this._onEvent.apply(this._target, [PetCat.Event.HURT, cureValue]);
     }
 }
 

@@ -57,7 +57,7 @@ export class CharPanel extends Component {
             this.gotoIndex(GameContext.selectedPlayerId);
         } else if (GameContext.GameScene === Constant.GameScene.Prepare) {
             this._opacity = 0;
-            this.gotoIndex(0);
+            this.gotoIndex(GameContext.selectedLevelId);
         }
         this.updateCharItemState();
     }

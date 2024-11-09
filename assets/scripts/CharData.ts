@@ -101,7 +101,7 @@ export class CharData {
         maxSpeed: 12, // 移动速度
         chaseDistance: 200,  // 追击距离
         attackRange: 70,  // 攻击距离
-        exp: 10,  // 经验值
+        exp: 100,  // 经验值
         ap: 5,  // 攻击力
         attackNumber: 1,  // 攻击方式数
         isBoss: false,    // 是否是boss

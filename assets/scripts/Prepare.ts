@@ -21,6 +21,7 @@ export class Prepare extends Component {
     @property(Node) ndPetButton: Node; // 宠物选择按钮
     @property(Node) ndPetPanel: Node; // 宠物选择面板
     @property(Label) prepareMoneyLabel: Label; // 准备页面的金钱标签
+    @property(Label) LevelLabel: Label; // 等级标签
 
     protected onLoad(): void {
         GameContext.prepareMoneyLabel = this.prepareMoneyLabel;
@@ -28,9 +29,8 @@ export class Prepare extends Component {
 
     protected onEnable(): void {
         GameContext.GameScene = Constant.GameScene.Prepare;
-        Util.changeMoney();
-        // let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
-        // this.prepareMoneyLabel.string = price;
+        Util.changeMoney(0);
+        this.LevelLabel.string = 'Lv: ' + GameContext.playerLevel[GameContext.selectedPlayerId].level;
 
         ButtonEvent.setButtonEvent(this.ndBtnSettingButton, 'Setting', this.ndSettingPanel); // 设置按钮点击事件
         ButtonEvent.setButtonKeyEvent(this.ndBtnSettingButton, 'Setting', this.ndSettingPanel); // 商店按钮点击事件

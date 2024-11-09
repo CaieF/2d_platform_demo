@@ -67,19 +67,15 @@ export class NormalButton extends Component {
         // event.propagationStopped = true;
         switch (event.keyCode) {
             case KeyCode.KEY_A:
-                // AudioManager.Instance.playSound('sounds/drop', 1);
                 this._LeftCb && this.node.setScale(0.95, 0.95);
                 break;
             case KeyCode.KEY_D:
-                // AudioManager.Instance.playSound('sounds/drop', 1);
                 this._RightCb && this.node.setScale(0.95, 0.95);
                 break;
             case KeyCode.SPACE:
-                // AudioManager.Instance.playSound('sounds/drop', 1);
                 this._SpaceCb && this.node.setScale(0.95, 0.95);
                 break;
             case KeyCode.ESCAPE:
-                // AudioManager.Instance.playSound('sounds/drop', 1);
                 this._EscCb && this.node.setScale(0.95, 0.95);
                 break;
             default:

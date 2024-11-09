@@ -6,9 +6,9 @@ const { ccclass, property } = _decorator;
 @ccclass('SkillButton')
 export class SkillButton extends Component {
     @property(Node) ndText: Node; // 冷却时间文本
-    @property(Node) ndIcon: Node; // 技能按钮
+    // @property(Node) ndIcon: Node; // 技能按钮
     @property(Node) ndBG: Node; // 技能面板
-    @property(Node) ndLabel: Node; // 技能按键名
+    // @property(Node) ndLabel: Node; // 技能按键名
 
     private _isAvaliable: boolean = true; // 是否灰度渲染
     private _coldDownTime: number = 3; // 冷却时间
@@ -21,6 +21,10 @@ export class SkillButton extends Component {
     private _Skill1Cb: Function;
     private _Skill2Cb: Function;
     private _Skill3Cb: Function;
+    private _Item1Cb: Function;
+    private _Item2Cb: Function;
+    private _isSkill: boolean = true; // 是否技能
+    private _ItemId: number = -1; // 物品id
 
     public get coldDownTime(): number {
         return this._coldDownTime;
@@ -29,6 +33,22 @@ export class SkillButton extends Component {
     public set coldDownTime(value: number) {
         value = value >= 0 ? value : 0;
         this._coldDownTime = value;
+    }
+
+    public get isSkill(): boolean {
+        return this._isSkill;
+    }
+
+    public set isSkill(value: boolean) {
+        this._isSkill = value;
+    }
+
+    public get ItemId(): number {
+        return this._ItemId;
+    }
+
+    public set ItemId(value: number) {
+        this._ItemId = value;
     }
 
     public set isAvaliable(value: boolean) {
@@ -65,12 +85,16 @@ export class SkillButton extends Component {
         if (this._isColding) {
             this._currentColdTime -= deltaTime;
 
-            this.ndText.getComponent(Label).string = `${this._currentColdTime.toFixed(1)}`;
+            this.ndText.getComponent(Label).string = `${this._currentColdTime.toFixed(0)}`;
 
             if (this._currentColdTime <= 0) {
                 this._currentColdTime = 0;
                 this._isColding = false;
-                this.isAvaliable = true;
+                if (this.isSkill === false && this.ItemId !== -1) {
+                    if (GameContext.Goods[this.ItemId] <= 0) { this.isAvaliable = false; }
+                } else {
+                    this.isAvaliable = true;
+                }
                 this.ndText.active = false;
             }
         }
@@ -84,15 +108,19 @@ export class SkillButton extends Component {
     onTouchStart() {
         if (!this._isAvaliable) { return; }
         this._listener && this._listener.apply(this._target);
+        this.StartColdDown();
     }
     onTouchEnd() {
         if (!this._isAvaliable) { return; }
-        this.StartColdDown();
+        
     }
 
     onKeyDown(event: EventKeyboard) {
         if (GameContext.GameStatus === Constant.GameStatus.PAUSE) { return; }
-        if (GameContext.player.playerStatus !== Constant.CharStatus.IDLE && GameContext.player.playerStatus !== Constant.CharStatus.RUN &&  GameContext.player.playerStatus !== Constant.CharStatus.JUMP) return;
+        if (GameContext.player.playerStatus === Constant.CharStatus.DEATH) { return; }
+        if (this._isSkill &&  GameContext.player.playerStatus !== Constant.CharStatus.IDLE 
+            && GameContext.player.playerStatus !== Constant.CharStatus.RUN 
+            &&  GameContext.player.playerStatus !== Constant.CharStatus.JUMP) return;
         if (!this.isAvaliable) { return; }
         switch (event.keyCode) {
             case KeyCode.KEY_U:
@@ -116,6 +144,18 @@ export class SkillButton extends Component {
             case KeyCode.KEY_L:
                 this._Skill3Cb && this._Skill3Cb.apply(this._KeyTarget);
                 if (this._Skill3Cb) {
+                    this.StartColdDown();
+                }
+                break;
+            case KeyCode.KEY_Q:
+                this._Item1Cb && this._Item1Cb.apply(this._KeyTarget);
+                if (this._Item1Cb) {
+                    this.StartColdDown();
+                }
+                break;
+            case KeyCode.KEY_E:
+                this._Item2Cb && this._Item2Cb.apply(this._KeyTarget);
+                if (this._Item2Cb) {
                     this.StartColdDown();
                 }
                 break;
@@ -156,6 +196,16 @@ export class SkillButton extends Component {
         this._KeyTarget = target;
     }
 
+    onKeyQ(cb: Function, target?: any) {
+        this._Item1Cb = cb;
+        this._KeyTarget = target;
+    }
+
+    onKeyE(cb: Function, target?: any) {
+        this._Item2Cb = cb;
+        this._KeyTarget = target;
+    }
+
 
     StartColdDown() {
         this._currentColdTime = this._coldDownTime;
@@ -166,6 +216,11 @@ export class SkillButton extends Component {
             this.ndText.getComponent(Label).string = `${this._currentColdTime.toFixed(1)}`;
         } else {
             this._isColding = false;
+            if (this.isSkill === false && this.ItemId !== -1) {
+                if (GameContext.Goods[this.ItemId] <= 0) { this.isAvaliable = false; }
+            } else {
+                this.isAvaliable = true;
+            }
             this.isAvaliable = true;
             this.ndText.active = false;
         }

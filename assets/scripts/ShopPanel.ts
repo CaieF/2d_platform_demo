@@ -4,6 +4,7 @@ import { CharData } from './CharData';
 import { AudioManager } from './AudioManager';
 import { NormalButton } from './NormalButton';
 import { Util } from './Util';
+import { StorageManager } from './StorageManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('ShopPanel')
@@ -21,14 +22,20 @@ export class ShopPanel extends Component {
         let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
         this.setLabel('欢迎来到商店', '请选择要购买的物品', '你的钱币: ' + price);
         
+        // 点击购买按钮
         this.ndBtnBuy.getComponent(NormalButton).onClick(() => {
-            AudioManager.Instance.playSound('sounds/drop');
+            
             if (GameContext.Money >= CharData.GoodsConfig[this._selectGoodId].price) {
+                AudioManager.Instance.playSound('ItemSounds/costCoin');
                 Util.changeMoney(-CharData.GoodsConfig[this._selectGoodId].price)
+                GameContext.Goods[this._selectGoodId] += 1;
+                StorageManager.save('Goods', GameContext.Goods);
+                // console.log(GameContext.Goods);
                 let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
                 this.setLabel('恭喜你购买成功', '点击重新选择', '你的钱币: ' + price);
                 this.resetSelect();
             } else {
+                AudioManager.Instance.playSound('sounds/drop');
                 this.setLabel('你的钱币不足', '请重新选择');
                 this.resetSelect();
             }
