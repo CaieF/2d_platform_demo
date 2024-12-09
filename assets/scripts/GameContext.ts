@@ -29,13 +29,15 @@ export class GameContext {
   static prepareMoneyLabel: Label;
   static gameMoneyLabel: Label;
   static levels: any[] = [];
+  static EnemyNowNumbers: number = 0; // 怪物波数
+  static EnemyAllNumbers: number = 0; // 怪物总波数
   static isSound: boolean = true; // 是否开启声音
   static Money: number = parseInt(StorageManager.get('Money')) || 1000; // 游戏金币
   static Goods:object = StorageManager.get('Goods') || { // 游戏道具
     [CharData.GoodsId.Good1]: 0, // 红色补血药
     [CharData.GoodsId.Good2]: 0, // 蓝色补血药
   };
-  // 游戏等级
+  // 游戏角色等级
   static playerLevel: object =  StorageManager.get('playerLevel') || {
     [CharData.PlayersId.Player1]: {level: 1, exp: 1},
     [CharData.PlayersId.Player2]: {level: 1, exp: 0},
@@ -43,5 +45,14 @@ export class GameContext {
     [CharData.PlayersId.Player4]: {level: 1, exp: 0},
     [CharData.PlayersId.Player5]: {level: 1, exp: 0},
   }; 
+
+  游戏宠物等级
+  static petLevel: object =  StorageManager.get('petLevel') || {
+    [CharData.PetsId.Pet1]: {level: 1, exp: 0},
+    [CharData.PetsId.Pet2]: {level: 1, exp: 0},
+    [CharData.PetsId.Pet3]: {level: 1, exp: 0},
+    [CharData.PetsId.Pet4]: {level: 1, exp: 0},
+    [CharData.PetsId.Pet5]: {level: 1, exp: 0},
+  }
   // static playerConfigData: Object;
 }

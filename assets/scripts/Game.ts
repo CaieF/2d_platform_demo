@@ -129,21 +129,7 @@ export class Game extends Component {
         // 等级
         const LevelLabel = this._ndLevel.getComponent(Label);
         LevelLabel.string = `Lv: ${GameContext.player.level}`;
-
-        if (GameContext.selectedPetId !== -1) {
-            const petLifeBar = this._ndPetLifeBar.getComponent(ProgressBar);
-            petLifeBar.setProgress(GameContext.pet.hp / GameContext.pet.maxHp);
-            petLifeBar.setLabel(GameContext.pet.hp, GameContext.pet.maxHp);
-            // 经验条
-            const petExpBar = this._ndPetExpBar.getComponent(ProgressBar);
-            petExpBar.setProgress(0);
-            petExpBar.setLabel(0, GameContext.pet.maxExp);
-            // 等级
-            const petLevelLabel = this._ndPetLevel.getComponent(Label);
-            petLevelLabel.string = `Lv: ${GameContext.pet.level}`;
-        }
         
-
         GameContext.player.onPlayerEvent((event: number, value: number) => {
             switch (event) {
                 case Player.Event.HURT:
@@ -173,20 +159,32 @@ export class Game extends Component {
         });
 
         if (GameContext.selectedPetId !== -1) {
+            const petLifeBar = this._ndPetLifeBar.getComponent(ProgressBar);
+            petLifeBar.setProgress(GameContext.pet.hp / GameContext.pet.maxHp);
+            petLifeBar.setLabel(GameContext.pet.hp, GameContext.pet.maxHp);
+            // 经验条
+            const petExpBar = this._ndPetExpBar.getComponent(ProgressBar);
+            petExpBar.setProgress(GameContext.pet.exp / GameContext.pet.maxExp);
+            petExpBar.setLabel(GameContext.pet.exp, GameContext.pet.maxExp);
+            // 等级
+            const petLevelLabel = this._ndPetLevel.getComponent(Label);
+            petLevelLabel.string = `Lv: ${GameContext.pet.level}`;
+
             GameContext.pet.onPetEvent((event: number, value: number) => {
                 switch(event) {
                     case PetCat.Event.HURT:
-                        const petLifeBar = this._ndPetLifeBar.getComponent(ProgressBar);
                         petLifeBar.setProgress(GameContext.pet.hp / GameContext.pet.maxHp);
                         petLifeBar.setLabel(GameContext.pet.hp, GameContext.pet.maxHp);
                         break;
                     case PetCat.Event.ADD_EXP:
-                        const petExpBar = this._ndPetExpBar.getComponent(ProgressBar);
                         petExpBar.setProgress(GameContext.pet.exp / GameContext.pet.maxExp);
                         petExpBar.setLabel(GameContext.pet.exp, GameContext.pet.maxExp);
                         break;
                     case PetCat.Event.LEVEL_UP:
-                        const petLevelLabel = this._ndPetLevel.getComponent(Label);
+                        petLifeBar.setProgress(GameContext.pet.hp / GameContext.pet.maxHp);
+                        petExpBar.setLabel(GameContext.pet.exp, GameContext.pet.maxExp);
+                        petExpBar.setProgress(GameContext.pet.exp / GameContext.pet.maxExp);
+                        petExpBar.setLabel(GameContext.pet.exp, GameContext.pet.maxExp);
                         petLevelLabel.string = `Lv: ${GameContext.pet.level}`;
                         break;
                     default:
@@ -194,6 +192,7 @@ export class Game extends Component {
                 }
             })
         }
+
 
         if (this.ItemList) {
             for (let i = 0; i < this.ItemList.children.length; i++) {
@@ -250,6 +249,8 @@ export class Game extends Component {
     }
     async start() {
         GameContext.GameStatus = Constant.GameStatus.RUNNING;
+        GameContext.EnemyNowNumbers = 1; // 当前怪物波数
+        GameContext.EnemyAllNumbers = GameContext.levels[GameContext.selectedLevelId].numbers;
         this.scheduleOnce(this._spawnEnemy, 2);
     }
 
@@ -257,9 +258,12 @@ export class Game extends Component {
     private _spawnEnemy() {
         const selectedLevel = GameContext.levels[GameContext.selectedLevelId];
         if (!selectedLevel) return;
-        const minX = -130;
-        const maxX = 90;
-        const Y = 50;
+        // const numbers = selectedLevel.numbers; // 怪物波数
+        // GameContext.EnemyNowNumbers += 1; // 当前怪物波数 +1
+        const minX = -90 + (GameContext.EnemyNowNumbers - 1) * 360;
+        const maxX = 90 + (GameContext.EnemyNowNumbers - 1) * 360;
+        const Y = 0;
+        let deathEnemy = 0; // 死亡怪物数
         const createOne = (enemyId: number) => {
             if (!enemyId) return;
             // 相关数值配置
@@ -288,8 +292,11 @@ export class Game extends Component {
                     case Enemy.Event.DEATH:
                         GameContext.player.addExp(enemyConfigData.exp);
                         if (GameContext.selectedPetId !== -1) GameContext.pet.addExp(enemyConfigData.exp);
-                        
-                        // Util.changeMoney(enemyConfigData.exp);
+                        deathEnemy += 1;
+                        if (deathEnemy === 6 && GameContext.EnemyNowNumbers !== GameContext.EnemyAllNumbers) {
+                            GameContext.EnemyNowNumbers += 1; // 当前怪物波数 +1;
+                            this.scheduleOnce(this._spawnEnemy, 4);
+                        }
                         break;
                     case Enemy.Event.HURT:
                         if (GameContext.player.playerId === CharData.PlayersId.Player1) {
@@ -316,7 +323,7 @@ export class Game extends Component {
         
         // 刷新小怪
         if (selectedLevel.enemies.length > 0) {
-            const numberOfEnemies = 3; // 小怪数量
+            const numberOfEnemies = 6; // 小怪数量
             for (let i = 0; i < numberOfEnemies; i++) {
                 const randomEnemyId = selectedLevel.enemies[randomRangeInt(0, selectedLevel.enemies.length)];
                 createOne(randomEnemyId);
@@ -324,11 +331,10 @@ export class Game extends Component {
         }
 
         // 刷新boss
-        if (selectedLevel.boss.length > 0) {
+        if (selectedLevel.boss.length > 0 && GameContext.EnemyNowNumbers === GameContext.EnemyAllNumbers) {
             const BossId = selectedLevel.boss[0];
             createOne(BossId);
         }
-
     }
 
     // 加载角色
@@ -344,6 +350,8 @@ export class Game extends Component {
         const SkillBarPrefabUrl = playerConfigData.skillBarUrl;
 
         const hp = playerConfigData.hp;
+        const ap = playerConfigData.ap;
+        const addhp = playerConfigData.add_hp;
         const speed = playerConfigData.speed;
         const jump_speed = playerConfigData.jump_speed;
         // 角色
@@ -351,8 +359,7 @@ export class Game extends Component {
         if (playerNode) {
             GameContext.ndPlayer = playerNode;
             GameContext.player = playerNode.getComponent(Player);
-            GameContext.player.setValue(hp, hp, speed, jump_speed, 
-            GameContext.playerLevel[GameContext.selectedPlayerId].level, false); // 设置属性
+            GameContext.player.setValue(hp, ap, speed, jump_speed, addhp, false); // 设置属性
         }
         Util.loadPlayerAvatar(this.ndPlayerMessage)
         // 技能栏
@@ -380,7 +387,7 @@ export class Game extends Component {
             GameContext.ndPet = petNode;
             GameContext.pet = petNode.getComponent(PetCat);
             // const pet = petNode.getComponent(PetCat);
-            GameContext.pet.setValue(petConfig.petId, petConfig.hp, petConfig.ap, petConfig.speed, petConfig.type, petConfig.chaseDistance, petConfig.attackRange, petConfig.attackTime);
+            GameContext.pet.setValue(petConfig.petId, petConfig.hp, petConfig.ap, petConfig.speed, petConfig.add_hp, petConfig.type, petConfig.chaseDistance, petConfig.attackRange, petConfig.attackTime);
         }
         this.ndPetMessage.active = true;
         Util.loadPlayerAvatar(this.ndPetMessage, true);

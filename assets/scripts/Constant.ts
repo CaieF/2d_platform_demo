@@ -20,7 +20,8 @@ export class Constant {
     ENEMY: 1 << 3,
     PLAYER_ATTACK: 1 << 4,
     ENEMY_ATTACK: 1 << 5,
-    ITEM: 1 << 6
+    ITEM: 1 << 6,
+    PET_ATTACK: 1 << 7,
   }
 
 
@@ -77,6 +78,7 @@ export class Constant {
     SKELETON: 'Skeleton', // 骷髅
     SKELETON2: 'Skeleton2', // 骷髅2 
     SKELETON3: 'Skeleton3', // 骷髅3
+    BIG_SKELETON: 'BigSkeleton', // 大骷髅
     PET1: 'Pet1', // 宠物1
     PET2: 'Pet2', // 宠物2
     PET3: 'Pet3', // 宠物3
@@ -98,6 +100,9 @@ export class Constant {
     ENEMY:10,
     ENEMY_ATTACK1:11,
     ENEMY_ATTACK2:12, // 击退效果的攻击
+    // Pet_ATTACK1: 31, // 宠物攻击
+    // Pet_ATTACK2: 34, // 击退效果的攻击
+    // Pet_ATTACK3: 35, // 击中就消失的攻击
     ITEM_CURE: 21, // 恢复
     ITEM_COIN: 22, // 金币
   }

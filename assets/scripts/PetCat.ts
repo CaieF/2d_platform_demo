@@ -7,6 +7,7 @@ import { Globals } from './Globals';
 import { CharData } from './CharData';
 import { UseSkill } from './UseSkill';
 import { AudioManager } from './AudioManager';
+import { StorageManager } from './StorageManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('PetCat')
@@ -30,9 +31,10 @@ export class PetCat extends Component {
     hp:number = 10;
     ap: number = 1; // 攻击力
     maxHp: number = 10; // 最大血量
+    add_hp: number = 5; // 增加血量
 
     hurtedDamage: number = 0; // 受到的伤害
-    hurtedMaxDamage: number = 20; // 受到的最大伤害
+    hurtedMaxDamage: number = 50; // 受到的最大伤害
 
     fllowDistance: number = 100; // 跟随距离
     chaseDistance:number = 500; // 追击距离
@@ -60,12 +62,16 @@ export class PetCat extends Component {
         this._target = target;
     }
 
-    public setValue(id: number, hp: number, ap: number, speed: number, petType: number, chaseDistance: number, attackRange: number, attackTime?: number) {
+    public setValue(id: number, hp: number, ap: number, speed: number, add_hp:number, petType: number, chaseDistance: number, attackRange: number, attackTime?: number) {
+        this.level = GameContext.petLevel[id].level;
         this.petId = id;
-        this.hp = hp;
-        this.ap = ap;
+        this.add_hp = add_hp;
+        this.hp = hp + (this.level - 1) * this.add_hp;
+        this.ap = ap + Math.floor(this.level / 5) * 1;
         this.speed = speed;
-        this.maxHp = hp;
+        this.maxHp = this.hp;
+        this.exp = GameContext.petLevel[id].exp;
+        this.maxExp = this._getNextLevelExp(this.level);
         this.petType = petType;
         this.chaseDistance = chaseDistance;
         this.attackRange = attackRange;
@@ -108,8 +114,6 @@ export class PetCat extends Component {
         if (this.ndAni) {
             this.display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         }
-
-        
     }
 
     protected onEnable(): void {
@@ -121,10 +125,9 @@ export class PetCat extends Component {
         const colliders = this.node.getComponents(Collider2D);
         
         for (let collider of colliders) {
-            
             if (collider.group === Constant.ColliderGroup.PLAYER) {
                 this.HitCollider = collider;
-            } else if (collider.group === Constant.ColliderGroup.PLAYER_ATTACK) {
+            } else if (collider.group === Constant.ColliderGroup.PET_ATTACK) {
                 this.AttackCollider = collider;
             }
         }
@@ -144,12 +147,11 @@ export class PetCat extends Component {
         if (this.petStatus === Constant.CharStatus.ATTACK || this.petStatus === Constant.CharStatus.TAKEDAMAGE) return;
         this.rb = this.getComponent(RigidBody2D);
         let lv = this.rb!.linearVelocity;
-        const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
+        // const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
+        const x = clamp(this.node.position.x, -180, 180 + (GameContext.EnemyNowNumbers - 1) * 360); // 限制角色移动范围
         this.node.setPosition(x, this.node.position.y, 0);
         const playerPosition = Util.getPlayerPosition(); // 玩家位置
         const distanceToPlayer = Vec2.distance(playerPosition, this.node.worldPosition);
-
-        // console.log(Util.getNearbyEnemies(GameContext.ndPlayer, 100));
 
         // 随机移动
         this.randomMoveTimer += deltaTime;
@@ -222,7 +224,6 @@ export class PetCat extends Component {
             }
         }
 
-
         this.rb!.linearVelocity = lv;
     }
 
@@ -260,14 +261,21 @@ export class PetCat extends Component {
         if (this.hp <= 0) return;
 
         this.exp += exp;
+        GameContext.petLevel[this.petId].exp = this.exp;
         this._onEvent && this._onEvent.apply(this._target, [PetCat.Event.ADD_EXP, exp]);
 
         if (this.exp >= this.maxExp) {
             this.exp -= this.maxExp;
             this.level += 1;
+            GameContext.petLevel[this.petId].exp = this.exp;
+            GameContext.petLevel[this.petId].level = this.level;
+            this.maxHp += this.add_hp;
             this.maxExp = this._getNextLevelExp(this.level);
+            this.hp = this.maxHp;
+            if (this.level % 5) this.ap += 1;
             this._onEvent && this._onEvent.apply(this._target, [PetCat.Event.LEVEL_UP, -1]);
         }
+        StorageManager.save('petLevel', GameContext.petLevel);
     }
 
     hurt(damage: number) {

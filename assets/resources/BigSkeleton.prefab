@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "Skeleton",
+    "_name": "BigSkeleton",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Skeleton",
+    "_name": "BigSkeleton",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -46,7 +46,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0.701,
-      "y": 4.825,
+      "y": 3.819,
       "z": 0
     },
     "_lrot": {
@@ -108,8 +108,8 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 1.5,
-      "y": 1.5,
+      "x": 3,
+      "y": 3,
       "z": 1
     },
     "_mobility": 0,
@@ -260,12 +260,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": -8.5,
-      "y": -4.7
+      "y": -10
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 19.8,
-      "height": 38.8
+      "width": 39.6,
+      "height": 77.6
     },
     "_id": ""
   },
@@ -340,7 +340,7 @@
     "__prefab": {
       "__id__": 17
     },
-    "tag": 11,
+    "tag": 12,
     "_group": 32,
     "_density": 1,
     "_sensor": true,
@@ -348,13 +348,13 @@
     "_restitution": 0,
     "_offset": {
       "__type__": "cc.Vec2",
-      "x": 22.5,
-      "y": -13.9
+      "x": 45,
+      "y": -28
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 40.4,
-      "height": 19.9
+      "width": 80.8,
+      "height": 39.8
     },
     "_id": ""
   },

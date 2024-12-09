@@ -32,6 +32,8 @@ export class Enemy extends Component {
     private runTime: number = 0.35; // 移动时间
     private shakeTimer: number = 0; // 震动计时器
     private shakeTime: number = 0.8; // 震动时间
+    private hitTimer: number = 0; // 受击计时器 
+    private hitTime: number = 0.2; // 受击时间
     enemyId: number = 0; // 角色id
     isBoss: boolean = false; // 是否是Boss
     speed: number = 10;
@@ -140,7 +142,8 @@ export class Enemy extends Component {
             Util.checkCollider(this.attack1Collider, false);
             return;
         }
-        const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
+        // const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
+        const x = clamp(this.node.position.x, -180, 180 + (GameContext.EnemyNowNumbers - 1) * 360); // 限制角色移动范围
         this.node.setPosition(x, this.node.position.y, 0);
         let lv = this.rb!.linearVelocity;
 
@@ -192,7 +195,7 @@ export class Enemy extends Component {
                 } // 在攻击范围内
                 if (distanceToPlayer < this.attackRange && this.attackTimer >= this.attackTime) {
                     this.enemyStatus = Constant.CharStatus.ATTACK;
-                    if (!this.isBoss) {
+                    if (!this.isBoss || this.enemyId === CharData.EnemysId.Boss0) {
                         lv.x = 0;
                     }
                 }
@@ -217,11 +220,11 @@ export class Enemy extends Component {
 
     onBeginContact(self: Collider2D, other: Collider2D, contact: IPhysics2DContact) {
         if (self && other) {
-            if (other.group === Constant.ColliderGroup.PLAYER_ATTACK) {
+            if (other.group === Constant.ColliderGroup.PLAYER_ATTACK || other.group === Constant.ColliderGroup.PET_ATTACK) {
                 switch(other.tag) {
                     case Constant.ColliderTag.PLAYER_ATTACK1:
                         if (this.enemyStatus !== Constant.CharStatus.DEATH) {
-                            this.hurt(1);
+                            this.hurt(other.group === Constant.ColliderGroup.PLAYER_ATTACK ? GameContext.player.ap : 10);
                         }
                         break;
                     case Constant.ColliderTag.PLAYER_ATTACK2:
@@ -229,16 +232,16 @@ export class Enemy extends Component {
                             const scaleX = this.node.scale.x; // 获取敌人缩放的X值
                             const direction = scaleX > 0 ? -1 : 1;
                             Util.applyKnockback(this.isBoss? 10000:3000, this.rb!, new Vec2(direction, 0));
-                            this.hurt(1);
+                            this.hurt(other.group === Constant.ColliderGroup.PLAYER_ATTACK ? GameContext.player.ap : GameContext.pet.ap);
                         }
                         break;
                     case Constant.ColliderTag.PLAYER_ATTACK3:
                         if (this.enemyStatus !== Constant.CharStatus.DEATH) {
                             if (other.node.getComponent(Arrow).isSkill === true) {
-                                this.hurt(3);
+                                this.hurt(other.group === Constant.ColliderGroup.PLAYER_ATTACK ? GameContext.player.ap : GameContext.pet.ap);
                             } else {
                                 other.node.getComponent(Arrow).isHit = true;
-                                this.hurt(4);
+                                this.hurt(other.group === Constant.ColliderGroup.PLAYER_ATTACK ? GameContext.player.ap : GameContext.pet.ap);
                             }
                             break;
                         }
@@ -263,7 +266,7 @@ export class Enemy extends Component {
                 case Constant.ColliderTag.PLAYER_ATTACK1:
                     break;
                 case Constant.ColliderTag.PLAYER_ATTACK3:
-                    if (this.enemyStatus !== Constant.CharStatus.DEATH) {
+                    if (this.enemyStatus !== Constant.CharStatus.DEATH && GameContext.player.ap > 0) {
                         if (other.node.getComponent(Arrow).isSkill === true) {
                             setTimeout(() => {
                                 UseSkill.shootThunderStrike(self.node.worldPosition);
@@ -290,7 +293,7 @@ export class Enemy extends Component {
         const display = this.ndAni.getComponent(dragonBones.ArmatureDisplay);
         if (!display) return;
         if (this.enemyId !== CharData.EnemysId.Boss1) {
-            AudioManager.Instance.playSound('CharSounds/skeletonHit', 0.4)
+            AudioManager.Instance.playSound('CharSounds/skeletonHit', 0.3)
         } else {
             AudioManager.Instance.playSound('CharSounds/BossGrilDeath')
         }
@@ -336,6 +339,9 @@ export class Enemy extends Component {
         
         if (this.isBoss === true) {
             switch (this.enemyId) {
+                case CharData.EnemysId.Boss0:
+                    this.Boss0UseSkill();
+                    break;
                 case CharData.EnemysId.Boss1:
                     this.Boss1UseSkill(this.attack);
                     break;
@@ -352,7 +358,7 @@ export class Enemy extends Component {
         const onComplete = () => {
             this.attackTimer = 0;
             if (this.hp > 0) this.enemyStatus = Constant.CharStatus.IDLE;
-            this.attack1Collider.enabled = false;
+            if (this.attack1Collider) this.attack1Collider.enabled = false;
             display.off(dragonBones.EventObject.COMPLETE, onComplete, this);
         }
         
@@ -367,7 +373,7 @@ export class Enemy extends Component {
         display.armatureName = 'TakeDamage';
         display.playAnimation('TakeDamage', 1);
         if (!this.isBoss) {
-            AudioManager.Instance.playSound('CharSounds/skeletonHit', 0.4)
+            AudioManager.Instance.playSound('CharSounds/skeletonHit', 0.3)
         }
         const onComplete = () => {
             this.enemyStatus = Constant.CharStatus.IDLE;
@@ -380,13 +386,14 @@ export class Enemy extends Component {
     hurt (damage: number) {
         this.hp -= damage;
         Util.showText( `${damage}`, '#FFFFFF' ,this.node.worldPosition, GameContext.ndTextParent);
-        this._cb && this._cb.apply(this._target, [Enemy.Event.HURT, damage]);
+        
         
         if (this.hp <= 0) {
             this.hp = 0;
             this._cb && this._cb.apply(this._target, [Enemy.Event.DEATH])
             this.enemyStatus = Constant.CharStatus.DEATH;
         }
+        this._cb && this._cb.apply(this._target, [Enemy.Event.HURT, damage]);
 
         if (this.isBoss === false && this.hp > 0 && this.enemyStatus !== Constant.CharStatus.ATTACK && this.enemyStatus !== Constant.CharStatus.TAKEDAMAGE) {
             this.enemyStatus = Constant.CharStatus.TAKEDAMAGE;
@@ -404,6 +411,11 @@ export class Enemy extends Component {
         this.rb.linearVelocity = this.rb.linearVelocity.normalize().multiply(new Vec2(newSpeed, newSpeed));
     }
     
+    private Boss0UseSkill () {
+        this.updateAttackCollider(this.attack2Collider, 0.65, 45, 0.8);
+        GameContext.ndCamera.getComponent(Camera).shake(); // 震动
+    }
+
     // boss1相关技能
     private Boss1UseSkill (attack: number) {
         switch (attack) {
@@ -474,5 +486,3 @@ export class Enemy extends Component {
     }
 
 }
-
-

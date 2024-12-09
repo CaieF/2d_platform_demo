@@ -38,7 +38,7 @@ export class Camera extends Component {
 
         
         this.ndView.worldPosition = GameContext.ndPlayer.worldPosition;
-        const x = clamp(this.node.position.x, 0, 2304);
+        const x = clamp(this.node.position.x, 0, 768 * (GameContext.EnemyNowNumbers - 1));
         this.node.setPosition(x, 0);
         this.ndView.setPosition(x/2, 0);
         

@@ -101,14 +101,6 @@ export class Util {
     director.resume();
   }
 
-  // 吸引敌人效果
-  // static applyAttraction(attractionForce: number, rigid: RigidBody2D, targetPos: Vec3) {
-  //   if (rigid) {
-  //     const direction = targetPos.sub(rigid.position);
-  //     const force = direction.normalize().multiplyScalar(attractionForce);
-  //     rigid.applyForceToCenter(force, true);
-  //   }
-  // }
 
   // 获取范围的敌人
   static getNearbyEnemies(node: Node, Range: number): Node[] {
@@ -139,7 +131,8 @@ export class Util {
   static getNearbyPlayersAndPets(node: Node, Range: number): Node[] {
     const playersAndPets = GameContext.ndPlayerParents.children; // 获取所有玩家和宠物
     return playersAndPets.filter((playerOrPet) => {
-        const distance = Vec3.distance(node.worldPosition, playerOrPet.worldPosition); // 计算距离
+        // const distance = Vec3.distance(node.worldPosition, playerOrPet.worldPosition); // 计算距离
+        const distance = Math.abs(node.position.x - playerOrPet.position.x);
         return distance < Range; // 检查是否在吸引力范围内
     });
   }
@@ -202,14 +195,10 @@ export class Util {
   }
 
   static changeMoney(money: number=0) {
-    // console.log(money);
-    // GameContext.Money = StorageManager.get('Money') || 1000;
     if (money !== 0) {
       GameContext.Money += money;
       StorageManager.save('Money', GameContext.Money);
     }
-    
-    console.log(GameContext.Money);
     
     let price = ('00000' +  `${GameContext.Money.toString()}`).slice(-5);
     if (GameContext.prepareMoneyLabel) GameContext.prepareMoneyLabel.string = price;

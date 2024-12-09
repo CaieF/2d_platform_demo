@@ -98,9 +98,9 @@ export class PetPanel extends Component {
         display.playAnimation('Idle', 0);
 
         this.PetName.string = petData.name;
-        this.PetLevel.string = 'lv:' + petData.lv;
-        this.PetHp.string = '生命值:' + petData.hp;
-        this.PetAp.string = '攻击力:' + petData.ap;
+        this.PetLevel.string = 'lv:' + GameContext.petLevel[ind].level;
+        this.PetHp.string = '生命值:' + (petData.hp + GameContext.petLevel[ind].level * petData.add_hp);
+        this.PetAp.string = '攻击力:' + (petData.ap + Math.floor(GameContext.petLevel[ind].level / 5));
         this.PetSpeed.string = '速度:' + petData.speed;
         this.PetType.string = '宠物类型:' + petData.petType;
         let label = this.content.children[ind].getComponent(Label)

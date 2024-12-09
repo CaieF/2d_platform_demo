@@ -31,16 +31,21 @@
       {
         "index": 6,
         "name": "Item"
+      },
+      {
+        "index": 7,
+        "name": "PET_ATTACK"
       }
     ],
     "collisionMatrix": {
       "0": 1,
       "1": 108,
       "2": 26,
-      "3": 22,
+      "3": 150,
       "4": 12,
       "5": 2,
-      "6": 2
+      "6": 2,
+      "7": 8
     }
   },
   "custom_joint_texture_layouts": [],

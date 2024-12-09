@@ -92,6 +92,7 @@ export class SkillButton extends Component {
                 this._isColding = false;
                 if (this.isSkill === false && this.ItemId !== -1) {
                     if (GameContext.Goods[this.ItemId] <= 0) { this.isAvaliable = false; }
+                    else this.isAvaliable = true;
                 } else {
                     this.isAvaliable = true;
                 }
@@ -218,10 +219,11 @@ export class SkillButton extends Component {
             this._isColding = false;
             if (this.isSkill === false && this.ItemId !== -1) {
                 if (GameContext.Goods[this.ItemId] <= 0) { this.isAvaliable = false; }
+                else { this.isAvaliable = true; }
             } else {
                 this.isAvaliable = true;
             }
-            this.isAvaliable = true;
+            // this.isAvaliable = true;
             this.ndText.active = false;
         }
     }

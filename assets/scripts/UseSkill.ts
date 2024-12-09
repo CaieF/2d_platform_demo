@@ -177,7 +177,7 @@ export class UseSkill{
     const ndPetCat = Globals.getNode(Constant.PrefabUrl.PET_CAT, GameContext.ndPlayerParents);
     ndPetCat.worldPosition = position;
     const petData = CharData.petConfig[101];
-    ndPetCat.getComponent(PetCat).setValue(petData.petId, petData.hp, petData.ap, petData.speed,petData.type, petData.chaseDistance, petData.attackRange, petData.attackTime);
+    ndPetCat.getComponent(PetCat).setValue(petData.petId, petData.hp, petData.ap, petData.speed, petData.add_hp, petData.type, petData.chaseDistance, petData.attackRange, petData.attackTime);
   }
 
   // 召唤角色援助
@@ -188,7 +188,7 @@ export class UseSkill{
     ndPlayer.worldPosition = new Vec3 (position.x + 15 *scaleX, position.y, 0);
     ndPlayer.scale = (new Vec3(scaleX * 2, 2, 0));
     const pk = ndPlayer.getComponent(Player);
-    pk.setValue(100, 100, 0, 0, true, number);
+    pk.setValue(100, 100, 0, 0, 1, true, number);
   }
 
   // 发送豌豆

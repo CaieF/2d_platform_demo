@@ -44,16 +44,20 @@ export class Player extends Component {
 
     hp: number = 100; // 血量
     maxHp: number = 100; // 最大血量
+    ap: number = 10; // 攻击力
     speed: number = 12; // 移动速度
     jump_speed:number = 10; // 跳跃速度
     level: number = 1; // 等级
     exp: number = 0; // 经验值
     maxExp: number = 100; // 最大经验值
+    addHp: number = 5; // 增加血量
 
-    setValue (hp: number, maxHp: number, speed: number, jump_speed: number, level: number, isSummon=false, SummonId?: number) {
-        this.level = level;
-        this.hp = hp + (level - 1) * 5;
-        this.maxHp = maxHp + (level - 1) * 5;
+    setValue (hp: number, ap: number, speed: number, jump_speed: number, addHp: number, isSummon=false, SummonId?: number) {
+        this.level = GameContext.playerLevel[this.playerId].level;
+        this.addHp = addHp;
+        this.hp = hp + (this.level - 1) * addHp;
+        this.maxHp = hp + (this.level - 1) * addHp;
+        this.ap = ap + Math.floor(this.level / 5);
         this.speed = speed;
         this.jump_speed = jump_speed;
         this.exp = GameContext.playerLevel[this.playerId].exp;
@@ -187,7 +191,7 @@ export class Player extends Component {
 
     
     update(deltaTime: number) {
-        const x = clamp(this.node.position.x, -180, 1330); // 限制角色移动范围
+        const x = clamp(this.node.position.x, -180, 180 + (GameContext.EnemyNowNumbers - 1) * 360); // 限制角色移动范围
         this.node.setPosition(x, this.node.position.y, 0);
         if (this.playerStatus == Constant.CharStatus.TAKEDAMAGE) return;
         if (this.playerStatus == Constant.CharStatus.ATTACK) return;
@@ -512,15 +516,14 @@ export class Player extends Component {
             this.level += 1;
             GameContext.playerLevel[this.playerId].exp = this.exp;
             GameContext.playerLevel[this.playerId].level = this.level;
-            this.maxHp += 5;
+            this.maxHp += this.addHp;
+            if (this.level % 5 === 0) this.ap += 1;
             this.hp = this.maxHp;
             this.maxExp = this._getNextLevelExp(this.level);
             this._onEvent && this._onEvent.apply(this._target, [Player.Event.LEVEL_UP, -1]);
         }
         StorageManager.save('playerLevel', GameContext.playerLevel);
     }
-
-    
 
     // 受伤
     hurt (damage: number) {
